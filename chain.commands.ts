@@ -28,33 +28,11 @@ export const addWallet = (wallet: WalletType): CommandType => {
   }
 }
 
-export const addContract = (contract: ContractType, id?: string): CommandType => {
-  let prev = undefined;
-
+export const addContract = (contract: any): CommandType => {
   const execute: ExecuteType = state => {
-    prev = state
+    if (state.contract === undefined) state.contract = {}
 
-    state.contract[id || contract.id] = contract
-
-    return state
-  }
-
-  const undo: UndoType = state => {
-    prev = state
-    return { ...prev }
-  }
-
-  return {
-    execute,
-    undo
-  }
-}
-
-export const addContractNew = (contract: any): CommandType => {
-  const execute: ExecuteType = state => {
-    if (state.contractNew === undefined) state.contractNew = {}
-
-    state.contractNew[contract.id] = {
+    state.contract[contract.id] = {
       assets: {},
       table: {},
       ...contract
@@ -64,7 +42,7 @@ export const addContractNew = (contract: any): CommandType => {
   }
 
   const undo: UndoType = state => {
-    delete state.contractNew[contract.id]
+    delete state.contract[contract.id]
 
     return state
   }

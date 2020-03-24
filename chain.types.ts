@@ -46,9 +46,6 @@ export type ContractStateType = {
 
 export type StateType = {
   contract: {
-    [K: string]: ContractType
-  },
-  contractNew?: {
     [K: string]: Contract
   },
   wallet: {

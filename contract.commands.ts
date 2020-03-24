@@ -1,5 +1,5 @@
 import Chain from './chain'
-import { addWallet, addContract, addContractNew } from './chain.commands';
+import { addWallet, addContract } from './chain.commands';
 
 import {
   CommandType,
@@ -25,25 +25,25 @@ import {
   Contract
 } from './contract'
 
-const getContract = (state: StateType, id: string): Contract => state.contractNew[id]
+const getContract = (state: StateType, id: string): Contract => state.contract[id]
 
 const getTable = (state: StateType, id: string): ContractStateType['table'] => getContract(state, id).table
 
 export const addAsset = (asset: AssetType, target: Contract): CommandType => {
   const execute: ExecuteType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
 
-    contractNew[target.id].assets[asset.toLowerCase()] = 0
+    contract[target.id].assets[asset.toLowerCase()] = 0
       
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
 
   const undo: UndoType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
 
-    delete contractNew[target.id].assets[asset.toLowerCase()]
+    delete contract[target.id].assets[asset.toLowerCase()]
 
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
   
   return {
@@ -59,24 +59,24 @@ export const seed = (
   contractId: string
 ): CommandType => {
   const execute: ExecuteType = state => {
-    const { contractNew, wallet } = state;
+    const { contract, wallet } = state;
     const assets = wallet[buyer.id].assets
 
     wallet[buyer.id].assets[assetSeeding] = format(assets[assetSeeding] - amount)
 
-    contractNew[contractId].assets[assetSeeding] = amount
+    contract[contractId].assets[assetSeeding] = amount
       
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
 
   const undo: UndoType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
     const { baseToken } = getTable(state, contractId)
 
-    contractNew[contractId].assets[assetSeeding] = 0
-    contractNew[contractId].assets[baseToken] = 0
+    contract[contractId].assets[assetSeeding] = 0
+    contract[contractId].assets[baseToken] = 0
 
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
   
   return {
@@ -92,32 +92,32 @@ export const mint = (
   contractId: string
 ): CommandType => {
   const execute: ExecuteType = state => {
-    const { contractNew, wallet } = state
+    const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
     if (!hasFunds(amount, baseToken, assetSelling, wallet[buyer.id])(getContract(state, contractId))) return state
     
-    const payable = calcMintPayable(amount, baseToken, assetSelling)(contractNew[contractId])
+    const payable = calcMintPayable(amount, assetSelling)(contract[contractId])
 
     const { assets } = wallet[buyer.id]
 
     wallet[buyer.id].assets[assetSelling] = format(assets[assetSelling] - amount)
 
-    contractNew[contractId].assets[assetSelling] = format(contractNew[contractId].assets[assetSelling] + amount)
+    contract[contractId].assets[assetSelling] = format(contract[contractId].assets[assetSelling] + amount)
 
     wallet[buyer.id].assets[baseToken] = format((assets[baseToken] || 0) + payable)
       
-    return { ...state, contractNew, wallet }
+    return { ...state, contract, wallet }
   }
 
   const undo: UndoType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
     const { baseToken } = getTable(state, contractId)
 
-    contractNew[contractId].assets[assetSelling] = 0
-    contractNew[contractId].assets[baseToken] = 0
+    contract[contractId].assets[assetSelling] = 0
+    contract[contractId].assets[baseToken] = 0
 
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
   
   return {
@@ -133,30 +133,30 @@ export const liquidate = (
   contractId: string
 ): CommandType => {
   const execute: ExecuteType = state => {
-    const { contractNew, wallet } = state
+    const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
     if (!hasFunds(amount, baseToken, assetBuying, wallet[buyer.id])(getContract(state, contractId))) return state
     
-    const payable = calcLiquidatePayable(amount, assetBuying, baseToken)(contractNew[contractId])
+    const payable = calcLiquidatePayable(amount, assetBuying)(contract[contractId])
 
     const { assets } = wallet[buyer.id]
 
     wallet[buyer.id].assets[baseToken] = format(assets[baseToken] - amount)
 
-    contractNew[contractId].assets[assetBuying] = format(contractNew[contractId].assets[assetBuying] - payable)
+    contract[contractId].assets[assetBuying] = format(contract[contractId].assets[assetBuying] - payable)
 
     wallet[buyer.id].assets[assetBuying] = format((assets[assetBuying] || 0) + payable)
       
-    return { ...state, contractNew, wallet }
+    return { ...state, contract, wallet }
   }
 
   const undo: UndoType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
 
-    contractNew[contractId].assets[assetBuying] = 0
+    contract[contractId].assets[assetBuying] = 0
 
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
   
   return {
@@ -207,20 +207,20 @@ export const setTable = (
   let prev
 
   const execute: ExecuteType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
 
-    prev = { ...contractNew[target.id].table }
-    contractNew[target.id].table = table
+    prev = { ...contract[target.id].table }
+    contract[target.id].table = table
       
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
 
   const undo: UndoType = state => {
-    const { contractNew } = state;
+    const { contract } = state;
 
-    contractNew[target.id].table = { ...prev }
+    contract[target.id].table = { ...prev }
 
-    return { ...state, contractNew }
+    return { ...state, contract }
   }
   
   return {

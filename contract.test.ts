@@ -28,7 +28,7 @@ describe('Liboro', () => {
 
     new Contract('liboro').deploy(chain)
 
-    expect(chain.getState().contractNew.liboro).to.exist
+    expect(chain.getState().contract.liboro).to.exist
   })
 
   it('can configure', () => {
@@ -38,7 +38,7 @@ describe('Liboro', () => {
       .deploy(chain)
       .configure('usd', 'liborodollar', 100)
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
     expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
@@ -54,7 +54,7 @@ describe('Liboro', () => {
       .configure('usd', 'liborodollar', 100)
       .addAsset('eos')
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
     expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
@@ -72,7 +72,7 @@ describe('Liboro', () => {
       .configure('usd', 'liborodollar', 100)
       .addToken('taupemist')
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
     expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
@@ -99,7 +99,7 @@ describe('Liboro', () => {
       .configure('usd', 'liborodollar', 1000)
       .mint(50, 'usd', taupemist)
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
     let { wallet } = chain.getState()
 
     expect(liboro.table.asset.usd.marketCap).to.equal(50)
@@ -115,7 +115,7 @@ describe('Liboro', () => {
       .configure('usd', 'tinydollar', 100)
       .mint(50, 'usd', taupemist)
 
-    const { tiny } = chain.getState().contractNew
+    const { tiny } = chain.getState().contract
     wallet = chain.getState().wallet
 
     expect(tiny.table.asset.usd.marketCap).to.equal(50)
@@ -131,7 +131,7 @@ describe('Liboro', () => {
       .configure('usd', 'largedollar', 10000)
       .mint(100, 'usd', taupemist)
 
-    const { large } = chain.getState().contractNew
+    const { large } = chain.getState().contract
     wallet = chain.getState().wallet
 
     expect(large.table.asset.usd.marketCap).to.equal(100)
@@ -162,7 +162,7 @@ describe('Liboro', () => {
       .liquidate(33.33, 'usd', taupemist)
     
     const { wallet } = chain.getState()
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(wallet.taupemist.assets.usd).to.equal(1000)
     expect(wallet.taupemist.assets.liborodollar).to.equal(0)
@@ -224,7 +224,7 @@ describe('Liboro', () => {
       .configure('usd', 'liborodollar', 1000)
       .seed(100, 'eos', wallet)
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.assets.eos).to.equal(100)
 
@@ -254,7 +254,7 @@ describe('Liboro', () => {
       .configure('usd', 'liborodollar', 1000, wallet)
       .rebalance(flatten, wallet)
     
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
       usd: 50,
@@ -295,7 +295,7 @@ describe('Liboro', () => {
       .mint(110, 'usd', taupemist)
       .rebalance(flatten, taupemist)
 
-    const { liboro } = chain.getState().contractNew
+    const { liboro } = chain.getState().contract
 
     expect(liboro.table.portfolio.cole).to.deep.equal({
       usd: 100,

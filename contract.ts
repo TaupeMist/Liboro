@@ -1,4 +1,4 @@
-import { addContractNew } from './chain.commands';
+import { addContract } from './chain.commands';
 
 import {
   AssetHardType,
@@ -8,6 +8,7 @@ import {
   ContractStateType,
   GetPorfolioType,
   TableType,
+  PortfolioType,
 } from './chain.types'
 
 import {
@@ -35,7 +36,7 @@ export class Contract {
 
   get assets(): ContractStateType['assets'] {
     try {
-      return this.chain.getState().contractNew[this.id].assets
+      return this.chain.getState().contract[this.id].assets
     } catch (ex) {
       throw new Error('Contract not found. Please ensure that the contract has been deployed.')
     }
@@ -43,7 +44,7 @@ export class Contract {
 
   get table(): TableType {
     try {
-      return this.chain.getState().contractNew[this.id].table
+      return this.chain.getState().contract[this.id].table
     } catch (ex) {
       throw new Error('Contract not found. Please ensure that the contract has been deployed.')
     }
@@ -72,7 +73,7 @@ export class Contract {
     if (this.chain) throw new Error('Chain already exists. Cannot override chain.')
 
     try {
-      chain.execute(addContractNew(this))
+      chain.execute(addContract(this))
 
       this.chain = chain
 
@@ -131,10 +132,6 @@ export class Contract {
   transfer = (amount: number, asset: AssetType, sender: WalletType, receiver: WalletType) => {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
-    // TODO: The global portfolio should also be updated here.
-    // Perhaps the global portfolio should be replaced by a linear asset
-    // as it may not be possible to calculate otherwise
-
     return this
   }
 
@@ -147,7 +144,7 @@ export class Contract {
   }
 
   mint = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const payable = calcMintPayable(amount, this.table.baseToken, asset)(this)
+    const payable = calcMintPayable(amount, asset)(this)
 
     this.chain.execute(mint(amount, asset, wallet, this.id))
 
@@ -155,6 +152,15 @@ export class Contract {
       asset,
       wallet
     })
+
+    this.rebalance((portfolio: PortfolioType): PortfolioType => {
+      // TODO: calc and set wallet portfolio
+      // should also be applied when liquidating (in reverse)
+      // using the payable amount, calculate the portfolio increase portfolio of that asset
+      // add equal/flat decrease of other assets
+
+      return portfolio
+    }, wallet)
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
@@ -166,9 +172,12 @@ export class Contract {
   }
 
   liquidate = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const payable = calcLiquidatePayable(amount, asset, this.table.baseToken)(this)
+    const payable = calcLiquidatePayable(amount, asset)(this)
 
     this.chain.execute(liquidate(amount, asset, wallet, this.id))
+
+    // TODO: calc and set wallet portfolio
+    this.table.portfolio.global = calcGlobalPortfolio(wallet)(this)
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - payable)
@@ -181,7 +190,7 @@ export class Contract {
 
   rebalance = (getPortfolio: GetPorfolioType, wallet: WalletType): this => {
     this.table.portfolio[getWalletId(wallet)] = calcPortfolio(getPortfolio, wallet)(this)
-    this.table.portfolio.global = calcGlobalPortfolio(getPortfolio, wallet)(this)
+    this.table.portfolio.global = calcGlobalPortfolio(wallet, getPortfolio)(this)
 
     return this
   }
@@ -204,12 +213,13 @@ export class Contract {
     }
 
     if (wallet) {
-      // Use the current global portfolio as default wallet portfolio
+      // If wallet portfolio does not exist, set wallet portfolio asset to current global portfolio
       const isNewWalletPortfolio = !this.table.portfolio[getWalletId(wallet)]
       if (isNewWalletPortfolio) {
         this.table.portfolio[getWalletId(wallet)] = { ...this.table.portfolio.global }
       }
 
+      // If wallet portfolio's asset does not exist, set wallet portfolio's asset to 0
       const isNewAsset = asset && !this.table.portfolio[getWalletId(wallet)][asset]
       if (isNewAsset)
         this.table.portfolio[getWalletId(wallet)][asset] = 0

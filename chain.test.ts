@@ -2,69 +2,55 @@ import 'mocha';
 import { expect } from 'chai';
 
 import Chain from './chain';
-import { addContract, addWallet } from './chain.commands';
 
-const wallet = {
-  Fred: {
-    id: "Fred",
-    assets: {
-      token: 1000,
-      usd: 1000
-    }
-  }
-}
+import {
+  addWallet
+} from './chain.commands'
 
-const contract = {
-  Balance: {
-    id: "Balance",
-    assets: {
-      token: 100,
-      usd: 100
-    }
-  }
-}
+import {
+  WalletType
+} from './chain.types'
 
-const INITIAL_STATE = {
-  wallet,
-  contract
-}
+import {
+  Contract
+} from './contract'
 
 describe('Chain', () => {
   it('should init chain', () => {
-    let chain = Chain({ initialState: { ...INITIAL_STATE } });
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
-    expect(chain.getState()).to.eql(INITIAL_STATE)
-
-    chain = Chain();
-
-    expect(chain.getState()).to.eql({ contract: {}, wallet: {} })
+    expect(chain.getState()).to.deep.equal({ wallet: {}, contract: {} })
   });
 
   context('contract', () => {
     it('can be registered', () => {
-      const chain = Chain();
+      const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
-      expect(chain.getState()).to.eql({ contract: {}, wallet: {} })
+      new Contract('liboro')
+        .deploy(chain)
 
-      chain.execute(addContract(contract.Balance))
-  
-      expect(chain.getState().contract).to.eql({
-        [contract.Balance.id]: contract.Balance
-      })
+      const { contract } = chain.getState()
+
+      expect(contract.liboro).to.exist
     })
   })
 
   context('wallet', () => {
     it('can be registered', () => {
-      const chain = Chain();
+      const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
-      // expect(chain.getState()).to.eql({ contract: {}, wallet: {} })
+      const taupemist: WalletType = {
+        id: 'taupemist',
+        assets: {
+          usd: 1000
+        }
+      }
 
-      chain.execute(addWallet(wallet.Fred))
-  
-      expect(chain.getState().wallet).to.eql({
-        [wallet.Fred.id]: wallet.Fred
-      })
+      chain.execute(addWallet(taupemist))
+
+      const { wallet } = chain.getState()
+
+      expect(wallet.taupemist).to.exist
     })
   })
 });

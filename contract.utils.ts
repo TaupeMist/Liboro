@@ -22,16 +22,16 @@ export const getValue = (asset: AssetType) => (contract: Contract): number => {
   return format(contract.table.portfolio.global[asset] / 100)
 }
 
-export const calcMintPayable = (amount: number, assetBuying: AssetType, assetSelling: AssetType) => (contract: Contract): number => {
+export const calcMintPayable = (amount: number, assetSelling: AssetType) => (contract: Contract): number => {
   const total = contract.table.baseSupply + contract.assets[assetSelling] + amount
 
   const ratio = format(amount / total * getValue(assetSelling)(contract))
 
-  return format(ratio * (contract.assets[assetBuying] || contract.table.baseSupply))
+  return format(ratio * (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
 }
 
-export const calcLiquidatePayable = (amount: number, assetBuying: AssetType, assetSelling: AssetType) => (contract: Contract): number => {
-  const total = contract.assets[assetSelling] + amount
+export const calcLiquidatePayable = (amount: number, assetBuying: AssetType) => (contract: Contract): number => {
+  const total = contract.assets[contract.table.baseToken] + amount
 
   const ratio = format(amount / total * getValue(assetBuying)(contract))
 
@@ -52,8 +52,10 @@ export const calcRebalanceWeight = (wallet: WalletType) => (contract: Contract):
   return format((wallet.assets[baseToken] || 0) / asset[baseToken].marketCap)
 }
 
-export const calcGlobalPortfolio = (getPortfolio: GetPorfolioType, wallet: WalletType) => (contract: Contract): PortfolioType => {
-  const currWalletPortfolio = calcPortfolio(getPortfolio, wallet)(contract)
+export const calcGlobalPortfolio = (wallet: WalletType, getPortfolio?: GetPorfolioType) => (contract: Contract): PortfolioType => {
+  const currWalletPortfolio = getPortfolio
+    ? calcPortfolio(getPortfolio, wallet)(contract)
+    : contract.table.portfolio[getWalletId(wallet)]
 
   const weight = calcRebalanceWeight(wallet)(contract)
   const weightNeg = 1 - weight
