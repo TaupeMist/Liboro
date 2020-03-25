@@ -26,7 +26,12 @@ import {
   getWalletId,
   calcMintPayable,
   calcLiquidatePayable,
-  format
+  format,
+  flatten,
+  getPortfolioTotal,
+  isPortfolioValid,
+  balance,
+  rebalanceMint
 } from './contract.utils'
 
 export class Contract {
@@ -144,23 +149,36 @@ export class Contract {
   }
 
   mint = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const payable = calcMintPayable(amount, asset)(this)
-
-    this.chain.execute(mint(amount, asset, wallet, this.id))
-
     this.updateTable({
       asset,
       wallet
     })
 
-    this.rebalance((portfolio: PortfolioType): PortfolioType => {
+    const payable = calcMintPayable(amount, asset)(this)
+
+    const increasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
+      if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
+        return portfolio
+
+      console.log('asset', asset, wallet.assets)
+
+      const nextPortfolio = rebalanceMint(portfolio, asset, wallet, payable)(this)
+
+      console.log('result', nextPortfolio)
+
       // TODO: calc and set wallet portfolio
       // should also be applied when liquidating (in reverse)
       // using the payable amount, calculate the portfolio increase portfolio of that asset
       // add equal/flat decrease of other assets
 
-      return portfolio
-    }, wallet)
+      return nextPortfolio
+    }
+
+    this.rebalance(increasePortfolioAsset, wallet)
+
+    console.log('end')
+
+    this.chain.execute(mint(amount, asset, wallet, this.id))    
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
@@ -190,7 +208,7 @@ export class Contract {
 
   rebalance = (getPortfolio: GetPorfolioType, wallet: WalletType): this => {
     this.table.portfolio[getWalletId(wallet)] = calcPortfolio(getPortfolio, wallet)(this)
-    this.table.portfolio.global = calcGlobalPortfolio(wallet, getPortfolio)(this)
+    this.table.portfolio.global = calcGlobalPortfolio(wallet)(this)
 
     return this
   }
