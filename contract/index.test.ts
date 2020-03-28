@@ -1,16 +1,16 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import Chain from './chain'
-import { addWallet } from './chain.commands';
+import Chain from '../chain'
+import { addWallet } from '../chain/commands';
 
 import {
   WalletType
-} from './chain.types'
+} from '../chain/types'
 
 import {
   Contract
-} from './contract'
+} from './index'
 
 describe('Liboro', () => {
   it('can init', () => {

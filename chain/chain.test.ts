@@ -1,19 +1,19 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import Chain from './chain';
+import Chain from './index';
 
 import {
   addWallet
-} from './chain.commands'
+} from './commands'
 
 import {
   WalletType
-} from './chain.types'
+} from './types'
 
 import {
   Contract
-} from './contract'
+} from '../contract'
 
 describe('Chain', () => {
   it('should init chain', () => {

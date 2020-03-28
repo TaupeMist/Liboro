@@ -3,11 +3,11 @@ import {
   WalletType,
   LiboroWalletType,
   LiboroAssetType
-} from './liboro.types'
+} from './types'
 
 import {
   getWalletId
-} from './contract.utils'
+} from './utils'
 
 export const getWallet = (state): WalletType => {
   return state.wallet

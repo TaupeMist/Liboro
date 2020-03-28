@@ -3,7 +3,7 @@ import {
   StoreType,
   StoreConfig,
   CommandType
-} from './chain.types'
+} from './types'
 
 export const INITIAL_STATE: StateType = {
   contract: {},

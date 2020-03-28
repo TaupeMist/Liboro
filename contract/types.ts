@@ -1,14 +1,24 @@
-import { Contract } from './contract'
+import { Contract } from './index'
 
 export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
 
 export type AssetType = AssetHardType | string
+
+export type LiboroAssetType = {
+  id: AssetType,
+  value: number,
+  marketCap: number
+}
 
 export type WalletType = {
   id: string,
   assets: {
     [A in AssetType]?: number
   }
+}
+
+export type LiboroWalletType = WalletType & {
+  portfolio: PortfolioType
 }
 
 export type ContractType = {

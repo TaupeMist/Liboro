@@ -1,4 +1,4 @@
-import { addContract } from './chain.commands';
+import { addContract } from '../chain/commands';
 
 import {
   AssetHardType,
@@ -11,7 +11,7 @@ import {
   PortfolioType,
   LiboroWalletType,
   LiboroAssetType
-} from './liboro.types'
+} from './types'
 
 import {
   addAsset,
@@ -20,7 +20,7 @@ import {
   mint,
   burn,
   transfer
-} from './contract.commands'
+} from './commands'
 
 import {
   calcPortfolio,
@@ -31,13 +31,12 @@ import {
   format,
   rebalanceMint,
   rebalanceBurn
-} from './contract.utils'
+} from './utils'
 
 import {
   getLiboroWallet,
-  getLiboroAsset,
-  getBaseTokenMarketCap
-} from './contract.selectors'
+  getLiboroAsset
+} from './selectors'
 
 export class Contract {
   private chain?: StoreType

@@ -6,11 +6,11 @@ import {
   ContractType,
   PortfolioType,
   GetPorfolioType
-} from './liboro.types'
+} from './types'
 
 import {
   Contract
-} from './contract'
+} from './index'
 
 export const format = (num: number):number => +num.toFixed(4);
 

@@ -2,9 +2,8 @@ import {
   CommandType,
   ExecuteType,
   UndoType,
-  WalletType,
-  ContractType
-} from './chain.types'
+  WalletType
+} from './types'
 
 export const addWallet = (wallet: WalletType): CommandType => {
   let prev = undefined;

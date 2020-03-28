@@ -8,18 +8,18 @@ import {
   ContractStateType,
   StateType,
   LiboroAssetType
-} from './liboro.types'
+} from './types'
 
 import {
   format,
   hasFunds,
   calcMintPayable,
   calcBurnPayable
-} from './contract.utils'
+} from './utils'
 
 import {
   Contract
-} from './contract'
+} from './index'
 
 const getContract = (state: StateType, id: string): Contract => state.contract[id]
 

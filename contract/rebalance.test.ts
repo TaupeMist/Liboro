@@ -1,20 +1,20 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import Chain from './chain'
-import { addWallet } from './chain.commands';
+import Chain from '../chain'
+import { addWallet } from '../chain/commands';
 
 import {
   WalletType
-} from './chain.types'
+} from '../chain/types'
 
 import {
   Contract
-} from './contract'
+} from './index'
 
 import {
   flatten
-} from './contract.utils'
+} from '../contract/utils'
 
 describe('Liboro - Rebalance', () => {
   it('can rebalance', () => {
