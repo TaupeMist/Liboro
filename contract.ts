@@ -9,14 +9,16 @@ import {
   GetPorfolioType,
   TableType,
   PortfolioType,
-} from './chain.types'
+  LiboroWalletType,
+  LiboroAssetType
+} from './liboro.types'
 
 import {
   addAsset,
   setTable,
   seed,
   mint,
-  liquidate,
+  burn,
   transfer
 } from './contract.commands'
 
@@ -25,14 +27,17 @@ import {
   calcGlobalPortfolio,
   getWalletId,
   calcMintPayable,
-  calcLiquidatePayable,
+  calcBurnPayable,
   format,
-  flatten,
-  getPortfolioTotal,
-  isPortfolioValid,
-  balance,
-  rebalanceMint
+  rebalanceMint,
+  rebalanceBurn
 } from './contract.utils'
+
+import {
+  getLiboroWallet,
+  getLiboroAsset,
+  getBaseTokenMarketCap
+} from './contract.selectors'
 
 export class Contract {
   private chain?: StoreType
@@ -72,6 +77,29 @@ export class Contract {
 
   get baseToken() {
     return this.table.baseToken
+  }
+
+  getState = () => {
+    return {
+      assets: { ...this.assets },
+      table: { ...this.table }
+    }
+  }
+
+  // TODO: return additonal account information (including its assets and price indexes) and create type
+  getWallet = (wallet: WalletType): LiboroWalletType => {
+    // TODO: return wallet portfolio cap
+    // TODO: return price index based wallet portfolio
+
+    return getLiboroWallet(this.getState())(wallet)
+  }
+
+  // TODO: return additonal asset information and create type
+  getAsset = (asset: AssetType): LiboroAssetType => {
+    // TODO: return global market cap
+    // TODO: return price index based global portfolio
+
+    return getLiboroAsset(this.getState())(asset)
   }
 
   deploy = (chain: StoreType): this => {
@@ -154,7 +182,14 @@ export class Contract {
       wallet
     })
 
-    const payable = calcMintPayable(amount, asset)(this)
+    const liboroAsset = {
+      ...this.getAsset(asset),
+      value: amount
+    }
+
+    const payable = calcMintPayable(liboroAsset)(this)
+
+    console.log('calcMintPayable', payable)
 
     const increasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
       if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
@@ -162,43 +197,77 @@ export class Contract {
 
       console.log('asset', asset, wallet.assets)
 
-      const nextPortfolio = rebalanceMint(portfolio, asset, wallet, payable)(this)
+      // When wallet portfolio cannot be increased
+      if (this.getWallet(wallet).portfolio[asset] === 100)
+        return portfolio
+
+      const nextPortfolio = rebalanceMint(portfolio, asset, wallet, payable, this.getAsset(this.baseToken))
 
       console.log('result', nextPortfolio)
-
-      // TODO: calc and set wallet portfolio
-      // should also be applied when liquidating (in reverse)
-      // using the payable amount, calculate the portfolio increase portfolio of that asset
-      // add equal/flat decrease of other assets
 
       return nextPortfolio
     }
 
     this.rebalance(increasePortfolioAsset, wallet)
 
-    console.log('end')
-
-    this.chain.execute(mint(amount, asset, wallet, this.id))    
+    this.chain.execute(mint(liboroAsset, wallet, this.id))    
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
 
     // TODO: move calc to utils
-    this.table.asset[this.table.baseToken].marketCap = format(this.table.asset[this.table.baseToken].marketCap + payable)
+    this.table.asset[this.table.baseToken].marketCap = format(this.table.asset[this.table.baseToken].marketCap + payable.value)
 
     return this
   }
 
-  liquidate = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const payable = calcLiquidatePayable(amount, asset)(this)
+  burn = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
+    const liboroAsset = {
+      ...this.getAsset(asset),
+      value: amount
+    }
+    const payable = calcBurnPayable(liboroAsset)
 
-    this.chain.execute(liquidate(amount, asset, wallet, this.id))
+    console.log('burnPayable', payable)
+
+    const descreasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
+      if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
+        return portfolio
+
+      console.log('descreasePortfolioAsset', this.getWallet(wallet))
+
+      // When wallet portfolio cannot be decreased
+      if (this.getWallet(wallet).portfolio[this.baseToken] === 0)
+        return portfolio
+
+      console.log('asset', asset, wallet.assets)
+
+      const nextPortfolio = rebalanceBurn(
+        portfolio,
+        this.getAsset(asset),
+        this.getWallet(wallet),
+        payable,
+        this.getAsset(this.baseToken))
+
+      console.log('result', nextPortfolio)
+
+      // TODO: calc and set wallet portfolio
+      // should also be applied when burning (in reverse)
+      // using the payable amount, calculate the portfolio increase portfolio of that asset
+      // add equal/flat decrease of other assets
+
+      return nextPortfolio
+    }
+
+    this.rebalance(descreasePortfolioAsset, wallet)
+
+    this.chain.execute(burn(liboroAsset, wallet, this.id))
 
     // TODO: calc and set wallet portfolio
     this.table.portfolio.global = calcGlobalPortfolio(wallet)(this)
 
     // TODO: move calc to utils
-    this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - payable)
+    this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - payable.value)
 
     // TODO: move calc to utils
     this.table.asset[this.table.baseToken].marketCap = format(this.table.asset[this.table.baseToken].marketCap - amount)

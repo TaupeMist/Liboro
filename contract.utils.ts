@@ -1,10 +1,12 @@
 import {
   AssetType,
   WalletType,
+  LiboroAssetType,
+  LiboroWalletType,
   ContractType,
   PortfolioType,
   GetPorfolioType
-} from './chain.types'
+} from './liboro.types'
 
 import {
   Contract
@@ -24,22 +26,26 @@ export const getValue = (asset: AssetType) => (contract: Contract): number => {
   return format(contract.table.portfolio.global[asset] / 100)
 }
 
-export const calcMintPayable = (amount: number, assetSelling: AssetType) => (contract: Contract): number => {
-  const total = contract.table.baseSupply + contract.assets[assetSelling] + amount
+export const calcMintPayable = (asset: LiboroAssetType) => (contract: Contract): LiboroAssetType => {
+  const total = contract.table.baseSupply + contract.assets[asset.id] + asset.value
 
-  const ratio = format(amount / total * getValue(assetSelling)(contract))
+  const ratio = format(asset.value / total * getValue(asset.id)(contract))
 
-  console.log('calcMintPayable', ratio)
+  console.log('calcMintPayable', total, ratio, (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
 
-  return format(ratio * (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
+  return {
+    ...asset,
+    value: format(ratio * (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
+  }
 }
 
-export const calcLiquidatePayable = (amount: number, assetBuying: AssetType) => (contract: Contract): number => {
-  const total = contract.assets[contract.table.baseToken] + amount
+export const calcBurnPayable = (asset: LiboroAssetType): LiboroAssetType => {
+  // TODO: Add logic to calculate the asset to be paid due to the burn 
 
-  const ratio = format(amount / total * getValue(assetBuying)(contract))
-
-  return format(ratio * contract.assets[assetBuying])
+  return {
+    ...asset,
+    value: 50
+  }
 }
 
 export const getWalletId = (wallet: WalletType): string => wallet.id.toLowerCase()
@@ -163,12 +169,18 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: AssetTyp
   return total === 0 ? flatten(portfolioToBalance) : balance(portfolioToBalance)
 }
 
-export const rebalanceMint = (portfolio: PortfolioType, asset: AssetType, wallet: WalletType, payable: number) => (contract: Contract): PortfolioType => {
-  const ratio = format(payable / (payable + wallet.assets[contract.baseToken]))
+export const rebalanceMint = (
+  portfolio: PortfolioType,
+  asset: AssetType,
+  wallet: WalletType,
+  payable: LiboroAssetType,
+  baseToken: LiboroAssetType
+): PortfolioType => {
+  const ratio = format(payable.value / (payable.value + wallet.assets[baseToken.id]))
 
   console.log('ratio', ratio)
 
-  const increase = format(wallet.assets[contract.baseToken] * ratio)
+  const increase = format(wallet.assets[baseToken.id] * ratio)
 
   console.log('increase', increase)
 
@@ -180,6 +192,61 @@ export const rebalanceMint = (portfolio: PortfolioType, asset: AssetType, wallet
     const value = assetId === asset
       ? format(portfolio[assetId] + increase)
       : format(portfolio[assetId] - asDecimal(portfolioMinusAsset[assetId]) * increase)
+
+    console.log('intoPortfolio', assetId, portfolio[assetId], value)
+
+    if (value > 100 || value < 0)
+      throw new Error(`Value must be between 0 and 100. Value: ${value}`)
+
+    return {
+      ...acc,
+      [assetId]: value
+    }
+  }
+
+  return Object
+    .keys(portfolio)
+    .reduce(intoPortfolio, {} as PortfolioType)
+}
+
+export const rebalanceBurn = (
+  portfolio: PortfolioType,
+  asset: LiboroAssetType,
+  wallet: LiboroWalletType,
+  payable: LiboroAssetType,
+  baseToken: LiboroAssetType
+): PortfolioType => {
+  console.log('Liboro Asset', asset)
+  console.log('Liboro Wallet', wallet)
+  console.log('Base Token', baseToken)
+
+  const ratio = format(payable.value / baseToken.marketCap)
+
+  if (ratio > 1 || ratio < 0)
+    throw new Error(`Ratio must equal between 0 and 1. Ratio: ${ratio}`)
+
+  console.log('ratio', ratio)
+
+  const decrease = format(wallet.assets[baseToken.id] * ratio)
+
+  console.log('decrease', decrease)
+
+  const portfolioMinusAsset = getPortfolioMinusAsset(portfolio, asset.id)
+
+  console.log('portfolioMinusAsset', portfolioMinusAsset)
+
+  if (portfolioMinusAsset[asset.id] !== undefined)
+    throw new Error(`Asset must be removed from portfolio. Asset: ${asset}. Portfolio: ${JSON.stringify(portfolioMinusAsset)}`)
+
+  const intoPortfolio = (acc: PortfolioType, assetId: string): PortfolioType => {
+    const value = assetId === asset.id
+      ? format(portfolio[assetId] - decrease)
+      : format(portfolio[assetId] + asDecimal(portfolioMinusAsset[assetId]) * decrease)
+
+    console.log('intoPortfolio', assetId, portfolio[assetId], value)
+
+    if (value > 100 || value < 0)
+      throw new Error(`Value must be between 0 and 100. Value: ${value}`)
 
     return {
       ...acc,

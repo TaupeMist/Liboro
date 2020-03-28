@@ -137,33 +137,56 @@ describe('Liboro - Rebalance', () => {
       .deploy(chain)
       .configure('usd', 'liborodollar', 1000)
       .mint(100, 'usd', taupemist)
-      .seed(100, 'eos', taupemist)
       .rebalance(() => ({
-        liborodollar: 0,
-        usd: 50,
-        eos: 50
+        liborodollar: 50,
+        usd: 50
       }), taupemist)
       .mint(100, 'usd', taupemist)
 
+    console.log('end')
+
     const { liboro } = chain.getState().contract
-
-    console.log('final: wallet', chain.getState().wallet)
-    console.log('final: portfolio', liboro.table.portfolio)
-    console.log('final: assets', liboro.assets)
-
-    // console.log('final: assets', liboro.assets)
-
-    // console.log('final: portfolio', liboro.table.portfolio)
     
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
-      liborodollar: 0,
       usd: 78.5881,
-      eos: 21.4119
+      liborodollar: 21.4119
     })
-    expect(liboro.table.portfolio.global).to.deep.equal({
-      liborodollar: 0,
-      usd: 78.5881,
-      eos: 21.4119
+  })
+
+  it('can rebalance when burning', () => {
+    console.log('can rebalance when burning')
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000,
+        eos: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new Contract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 100)
+      .mint(100, 'usd', taupemist)
+      .rebalance(() => ({
+        liborodollar: 50,
+        usd: 50
+      }), taupemist)
+      .burn(50, 'usd', taupemist)
+
+    console.log('end')
+
+    const { liboro } = chain.getState().contract
+    const { wallet } = chain.getState()
+
+    console.log('can rebalance when burning', wallet, liboro.assets, liboro.table)
+    
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      liborodollar: 100,
+      usd: 0
     })
   })
 })

@@ -1,24 +1,20 @@
-import Chain from './chain'
-import { addWallet, addContract } from './chain.commands';
-
 import {
   CommandType,
   AssetHardType,
   ExecuteType,
   UndoType,
-  ContractType,
-  StoreType,
   AssetType,
   WalletType,
   ContractStateType,
-  StateType
-} from './chain.types'
+  StateType,
+  LiboroAssetType
+} from './liboro.types'
 
 import {
   format,
   hasFunds,
   calcMintPayable,
-  calcLiquidatePayable
+  calcBurnPayable
 } from './contract.utils'
 
 import {
@@ -86,8 +82,7 @@ export const seed = (
 }
 
 export const mint = (
-  amount: number,
-  assetSelling: AssetType,
+  assetSelling: LiboroAssetType,
   buyer: WalletType,
   contractId: string
 ): CommandType => {
@@ -95,17 +90,17 @@ export const mint = (
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
-    if (!hasFunds(amount, baseToken, assetSelling, wallet[buyer.id])(getContract(state, contractId))) return state
+    if (!hasFunds(assetSelling.value, baseToken, assetSelling.id, wallet[buyer.id])(getContract(state, contractId))) return state
     
-    const payable = calcMintPayable(amount, assetSelling)(contract[contractId])
+    const payable = calcMintPayable(assetSelling)(contract[contractId])
 
     const { assets } = wallet[buyer.id]
 
-    wallet[buyer.id].assets[assetSelling] = format(assets[assetSelling] - amount)
+    wallet[buyer.id].assets[assetSelling.id] = format(assets[assetSelling.id] - assetSelling.value)
 
-    contract[contractId].assets[assetSelling] = format(contract[contractId].assets[assetSelling] + amount)
+    contract[contractId].assets[assetSelling.id] = format(contract[contractId].assets[assetSelling.id] + assetSelling.value)
 
-    wallet[buyer.id].assets[baseToken] = format((assets[baseToken] || 0) + payable)
+    wallet[buyer.id].assets[baseToken] = format((assets[baseToken] || 0) + payable.value)
       
     return { ...state, contract, wallet }
   }
@@ -114,7 +109,7 @@ export const mint = (
     const { contract } = state;
     const { baseToken } = getTable(state, contractId)
 
-    contract[contractId].assets[assetSelling] = 0
+    contract[contractId].assets[assetSelling.id] = 0
     contract[contractId].assets[baseToken] = 0
 
     return { ...state, contract }
@@ -126,9 +121,8 @@ export const mint = (
   }
 }
 
-export const liquidate = (
-  amount: number,
-  assetBuying: AssetType,
+export const burn = (
+  assetBuying: LiboroAssetType,
   buyer: WalletType,
   contractId: string
 ): CommandType => {
@@ -136,17 +130,17 @@ export const liquidate = (
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
-    if (!hasFunds(amount, baseToken, assetBuying, wallet[buyer.id])(getContract(state, contractId))) return state
+    if (!hasFunds(assetBuying.value, baseToken, assetBuying.id, wallet[buyer.id])(getContract(state, contractId))) return state
     
-    const payable = calcLiquidatePayable(amount, assetBuying)(contract[contractId])
+    const payable = calcBurnPayable(assetBuying)
 
     const { assets } = wallet[buyer.id]
 
-    wallet[buyer.id].assets[baseToken] = format(assets[baseToken] - amount)
+    wallet[buyer.id].assets[baseToken] = format(assets[baseToken] - assetBuying.value)
 
-    contract[contractId].assets[assetBuying] = format(contract[contractId].assets[assetBuying] - payable)
+    contract[contractId].assets[assetBuying.id] = format(contract[contractId].assets[assetBuying.id] - payable.value)
 
-    wallet[buyer.id].assets[assetBuying] = format((assets[assetBuying] || 0) + payable)
+    wallet[buyer.id].assets[assetBuying.id] = format((assets[assetBuying.id] || 0) + payable.value)
       
     return { ...state, contract, wallet }
   }
@@ -154,7 +148,7 @@ export const liquidate = (
   const undo: UndoType = state => {
     const { contract } = state;
 
-    contract[contractId].assets[assetBuying] = 0
+    contract[contractId].assets[assetBuying.id] = 0
 
     return { ...state, contract }
   }

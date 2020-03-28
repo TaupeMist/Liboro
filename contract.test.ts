@@ -12,10 +12,6 @@ import {
   Contract
 } from './contract'
 
-import {
-  flatten
-} from './contract.utils'
-
 describe('Liboro', () => {
   it('can init', () => {
     const liboro = new Contract('liboro')
@@ -82,6 +78,28 @@ describe('Liboro', () => {
     expect(liboro.assets.taupemist).to.deep.equal(0)
   })
 
+  it('can get wallet and asset', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new Contract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 1000)
+
+    const { liboro } = chain.getState().contract
+
+    console.log('Liboro Wallet', liboro.getWallet(taupemist))
+    console.log('Liboro Asset', liboro.getAsset('usd'))
+  })
+
   it('can mint', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -143,7 +161,7 @@ describe('Liboro', () => {
     expect(wallet.taupemist.assets.largedollar).to.equal(99)
   })
 
-  it('can liquidate', () => {
+  it('can burn', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
     const taupemist: WalletType = {
@@ -157,9 +175,9 @@ describe('Liboro', () => {
 
     new Contract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure('usd', 'liborodollar', 1000)
       .mint(50, 'usd', taupemist)
-      .liquidate(33.33, 'usd', taupemist)
+      .burn(47.6, 'usd', taupemist)
     
     const { wallet } = chain.getState()
     const { liboro } = chain.getState().contract
