@@ -10,11 +10,14 @@ import {
 import {
   calcPortfolio,
   calcGlobalPortfolio,
-  calcMintPayable,
   calcBurnPayable,
-  rebalanceMint,
   rebalanceBurn
 } from './utils'
+
+import {
+  calcMintPayable,
+  rebalanceMint
+} from './minting'
 
 import {
   Contract,
@@ -29,11 +32,6 @@ export class PortfolioContract extends Contract {
   public constructor(readonly id: string) { super(id) }
 
   mint = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    this.updateTable({
-      asset,
-      wallet
-    })
-
     const liboroAsset = {
       ...this.getAsset(asset),
       value: amount
@@ -53,12 +51,22 @@ export class PortfolioContract extends Contract {
       if (this.getWallet(wallet).portfolio[asset] === 100)
         return portfolio
 
-      const nextPortfolio = rebalanceMint(portfolio, asset, wallet, payable, this.getAsset(this.baseToken))
+      const nextPortfolio = rebalanceMint(
+        this.getAsset(asset),
+        this.getWallet(wallet),
+        payable,
+        this.getAsset(this.baseToken)
+      )
 
       console.log('result', nextPortfolio)
 
       return nextPortfolio
     }
+
+    this.updateTable({
+      asset,
+      wallet
+    })
 
     this.rebalance(increasePortfolioAsset, wallet)
 

@@ -134,19 +134,6 @@ export const calcGlobalPortfolio = (wallet: WalletType, getPortfolio?: GetPorfol
     .reduce(intoPortfolio, {} as PortfolioType)
 }
 
-export const calcMintPayable = (asset: LiboroAssetType) => (contract: Contract): LiboroAssetType => {
-  const total = contract.table.baseSupply + contract.assets[asset.id] + asset.value
-
-  const ratio = format(asset.value / total * getValue(asset.id)(contract))
-
-  console.log('calcMintPayable', total, ratio, (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
-
-  return {
-    ...asset,
-    value: format(ratio * (contract.assets[contract.table.baseToken] || contract.table.baseSupply))
-  }
-}
-
 export const calcBurnPayable = (asset: LiboroAssetType): LiboroAssetType => {
   // TODO: Add logic to calculate the asset to be paid due to the burn 
 
@@ -154,46 +141,6 @@ export const calcBurnPayable = (asset: LiboroAssetType): LiboroAssetType => {
     ...asset,
     value: 50
   }
-}
-
-export const rebalanceMint = (
-  portfolio: PortfolioType,
-  asset: AssetType,
-  wallet: WalletType,
-  payable: LiboroAssetType,
-  baseToken: LiboroAssetType
-): PortfolioType => {
-  const ratio = format(payable.value / (payable.value + wallet.assets[baseToken.id]))
-
-  console.log('ratio', ratio)
-
-  const increase = format(wallet.assets[baseToken.id] * ratio)
-
-  console.log('increase', increase)
-
-  const portfolioMinusAsset = getPortfolioMinusAsset(portfolio, asset)
-
-  console.log('portfolioMinusAsset', portfolioMinusAsset)
-
-  const intoPortfolio = (acc: PortfolioType, assetId: string): PortfolioType => {
-    const value = assetId === asset
-      ? format(portfolio[assetId] + increase)
-      : format(portfolio[assetId] - asDecimal(portfolioMinusAsset[assetId]) * increase)
-
-    console.log('intoPortfolio', assetId, portfolio[assetId], value)
-
-    if (value > 100 || value < 0)
-      throw new Error(`Value must be between 0 and 100. Value: ${value}`)
-
-    return {
-      ...acc,
-      [assetId]: value
-    }
-  }
-
-  return Object
-    .keys(portfolio)
-    .reduce(intoPortfolio, {} as PortfolioType)
 }
 
 export const rebalanceBurn = (

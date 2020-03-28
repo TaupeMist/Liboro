@@ -85,3 +85,19 @@ export type StoreType = {
   getCommandHistory: () => CommandType[],
   debug: (command?: CommandType) => {}
 }
+
+export interface IContract {
+  assets: ContractStateType['assets'],
+  table: ContractStateType['table']
+}
+
+export type TransactionStateType = {
+  wallet: WalletType,
+  contract: IContract
+}
+
+export type TransactionType = {
+  curr: TransactionStateType,
+  next: TransactionStateType,
+  meta: {}
+}

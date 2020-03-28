@@ -1,7 +1,10 @@
 import {
-  calcMintPayable,
   calcBurnPayable
 } from './utils'
+
+import {
+  calcMintPayable
+} from './minting'
 
 import {
   CommandType,

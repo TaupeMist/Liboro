@@ -1,4 +1,4 @@
-import { addContract } from '../chain';
+import { addContract, IContract } from '../chain';
 
 import {
   AssetHardType,
@@ -27,7 +27,7 @@ import {
   getLiboroAsset
 } from './selectors'
 
-export class Contract {
+export class Contract implements IContract {
   protected chain?: StoreType
 
   public constructor(readonly id: string) {}
