@@ -1,4 +1,4 @@
-import { Contract } from './index'
+import { Contract } from './contract'
 
 export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
 
@@ -45,8 +45,6 @@ export type TableType = {
   }
 }
 
-export type GetPorfolioType = (portfolio: PortfolioType) => PortfolioType
-
 export type ContractStateType = {
   assets: {
     [A in AssetType]?: number
@@ -62,15 +60,6 @@ export type StateType = {
     [K: string]: WalletType
   }
 }
-
-export type RebalanceType = {
-  [A in AssetType]: {
-    direction: 'up' | 'down',
-    value: number
-  }
-}
-
-export type GetRebalanceType = (portfolio: PortfolioType) => RebalanceType
 
 export interface StoreConfig {
   initialState?: StateType,

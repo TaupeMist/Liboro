@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import Chain from './index';
+import Chain from './chain';
 
 import {
   addWallet

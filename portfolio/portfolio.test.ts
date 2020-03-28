@@ -1,84 +1,46 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import Chain from '../chain'
-import { addWallet } from '../chain/commands';
+import {
+  PortfolioContract
+} from './portfolio'
+
+import { Chain, addWallet, WalletType } from '../chain'
 
 import {
-  WalletType
-} from '../chain/types'
+  flatten
+} from './utils'
 
-import {
-  Contract
-} from './index'
-
-describe('Liboro', () => {
-  it('can init', () => {
-    const liboro = new Contract('liboro')
-
-    expect(liboro.id).to.deep.equal('liboro')
-  })
-
-  it('can deploy', () => {
+describe('Portfolio', () => {
+  it('can rebalance', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
-    new Contract('liboro').deploy(chain)
+    const wallet: WalletType = {
+      id: 'taupemist',
+      assets: {}
+    }
 
-    expect(chain.getState().contract.liboro).to.exist
-  })
+    chain.execute(addWallet(wallet))
 
-  it('can configure', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-    new Contract('liboro')
+    new PortfolioContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
-
+      .configure('usd', 'liborodollar', 1000, wallet)
+      .rebalance(flatten, wallet)
+    
     const { liboro } = chain.getState().contract
 
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      usd: 50,
+      liborodollar: 50
+    })
 
-    expect(liboro.table.baseSupply).to.deep.equal(100)
+    expect(liboro.table.portfolio.global).to.deep.equal({
+      usd: 50,
+      liborodollar: 50
+    })
   })
 
-  it('can add hard assets', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-    new Contract('liboro')
-      .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
-      .addAsset('eos')
-
-    const { liboro } = chain.getState().contract
-
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.eos).to.deep.equal({ marketCap: 0 })
-
-    expect(liboro.assets.usd).to.deep.equal(0)
-    expect(liboro.assets.eos).to.deep.equal(0)
-  })
-
-  it('can add tokens', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-    new Contract('liboro')
-      .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
-      .addToken('taupemist')
-
-    const { liboro } = chain.getState().contract
-
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.taupemist).to.deep.equal({ marketCap: 0 })
-
-    expect(liboro.assets.liborodollar).to.deep.equal(0)
-    expect(liboro.assets.taupemist).to.deep.equal(0)
-  })
-
-  it('can get wallet and asset', () => {
+  it('can rebalance and calculate global portfolio', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
     const taupemist: WalletType = {
@@ -90,14 +52,137 @@ describe('Liboro', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new Contract('liboro')
+    const cole: WalletType = {
+      id: 'cole',
+      assets: {
+        usd: 1000
+      }
+    }
+
+    chain.execute(addWallet(cole))
+
+    new PortfolioContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure('usd', 'liborodollar', 1000, taupemist)
+      .mint(100, 'usd', cole)
+      .mint(110, 'usd', taupemist)
+      .rebalance(flatten, taupemist)
 
     const { liboro } = chain.getState().contract
 
-    console.log('Liboro Wallet', liboro.getWallet(taupemist))
-    console.log('Liboro Asset', liboro.getAsset('usd'))
+    expect(liboro.table.portfolio.cole).to.deep.equal({
+      usd: 100,
+      liborodollar: 0
+    })
+
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      usd: 50,
+      liborodollar: 50
+    })
+
+    expect(liboro.table.portfolio.global).to.deep.equal({
+      usd: 75,
+      liborodollar: 25
+    })
+  })
+
+  it('can rebalance on first mint to create initial portfolios', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new PortfolioContract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 1000)
+      .mint(10, 'usd', taupemist)
+
+    const { liboro } = chain.getState().contract
+    
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      liborodollar: 0,
+      usd: 100
+    })
+    expect(liboro.table.portfolio.global).to.deep.equal({
+      liborodollar: 0,
+      usd: 100
+    })
+  })
+
+  it('can rebalance when minting', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000,
+        eos: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new PortfolioContract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 1000)
+      .mint(100, 'usd', taupemist)
+      .rebalance(() => ({
+        liborodollar: 50,
+        usd: 50
+      }), taupemist)
+      .mint(100, 'usd', taupemist)
+
+    console.log('end')
+
+    const { liboro } = chain.getState().contract
+    
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      usd: 78.5881,
+      liborodollar: 21.4119
+    })
+  })
+
+  it('can rebalance when burning', () => {
+    console.log('can rebalance when burning')
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000,
+        eos: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new PortfolioContract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 100)
+      .mint(100, 'usd', taupemist)
+      .rebalance(() => ({
+        liborodollar: 50,
+        usd: 50
+      }), taupemist)
+      .burn(50, 'usd', taupemist)
+
+    console.log('end')
+
+    const { liboro } = chain.getState().contract
+    const { wallet } = chain.getState()
+
+    console.log('can rebalance when burning', wallet, liboro.assets, liboro.table)
+    
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      liborodollar: 100,
+      usd: 0
+    })
   })
 
   it('can mint', () => {
@@ -112,7 +197,7 @@ describe('Liboro', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new Contract('liboro')
+    new PortfolioContract('liboro')
       .deploy(chain)
       .configure('usd', 'liborodollar', 1000)
       .mint(50, 'usd', taupemist)
@@ -128,7 +213,7 @@ describe('Liboro', () => {
 
     expect(liboro.assets.usd).to.equal(50)
 
-    new Contract('tiny')
+    new PortfolioContract('tiny')
       .deploy(chain)
       .configure('usd', 'tinydollar', 100)
       .mint(50, 'usd', taupemist)
@@ -144,7 +229,7 @@ describe('Liboro', () => {
 
     expect(tiny.assets.usd).to.equal(50)
 
-    new Contract('large')
+    new PortfolioContract('large')
       .deploy(chain)
       .configure('usd', 'largedollar', 10000)
       .mint(100, 'usd', taupemist)
@@ -173,7 +258,7 @@ describe('Liboro', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new Contract('liboro')
+    new PortfolioContract('liboro')
       .deploy(chain)
       .configure('usd', 'liborodollar', 1000)
       .mint(50, 'usd', taupemist)
@@ -213,7 +298,7 @@ describe('Liboro', () => {
 
     chain.execute(addWallet(cole))
 
-    new Contract('liboro')
+    new PortfolioContract('liboro')
       .deploy(chain)
       .configure('usd', 'liborodollar', 100)
       .mint(50, 'usd', taupemist)
@@ -223,36 +308,5 @@ describe('Liboro', () => {
 
     expect(wallet.taupemist.assets.liborodollar).to.equal(13.33)
     expect(wallet.cole.assets.liborodollar).to.equal(20)
-  })
-
-  it('can seed', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-    const wallet: WalletType = {
-      id: 'taupemist',
-      assets: {
-        eos: 100
-      }
-    }
-
-    chain.execute(addWallet(wallet))
-
-    new Contract('liboro')
-      .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
-      .seed(100, 'eos', wallet)
-
-    const { liboro } = chain.getState().contract
-
-    expect(liboro.assets.eos).to.equal(100)
-
-    expect(liboro.table.portfolio.taupemist).to.exist
-    expect(liboro.table.portfolio.taupemist.usd).to.equal(100)
-    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(0)
-    expect(liboro.table.portfolio.taupemist.eos).to.equal(0)
-
-    expect(liboro.table.portfolio.global).to.exist
-    expect(liboro.table.portfolio.global.usd).to.equal(100)
-    expect(liboro.table.portfolio.global.eos).to.equal(0)
   })
 })
