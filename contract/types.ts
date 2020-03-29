@@ -28,6 +28,7 @@ export type ContractType = {
   }
 }
 
+// TODO: change from number to LiboroAssetType
 export type PortfolioType = {
   [A in AssetType]?: number
 }

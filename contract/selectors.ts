@@ -27,12 +27,15 @@ export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType
 }
 
 export const getLiboroAsset = (state) => (asset: AssetType): LiboroAssetType => {
+  console.log('state.table.portfolio', state.table.portfolio, asset)
   return {
     ...state.table.asset[asset],
     id: asset,
-    value: state.assets[asset]
+    value: state.assets[asset],
+    marketCap: state.table.asset[asset].marketCap || 0
   }
 }
+  
 
 export const getBaseTokenMarketCap = (state): number => {
   return getLiboroAsset(state)(state.baseToken).marketCap

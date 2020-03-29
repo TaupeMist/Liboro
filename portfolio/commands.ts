@@ -1,10 +1,6 @@
 import {
   calcBurnPayable
-} from './utils'
-
-import {
-  calcMintPayable
-} from './minting'
+} from './burning'
 
 import {
   CommandType,
@@ -21,15 +17,14 @@ import {
 export const mint = (
   assetSelling: LiboroAssetType,
   buyer: WalletType,
-  contractId: string
+  contractId: string,
+  payable: LiboroAssetType
 ): CommandType => {
   const execute: ExecuteType = state => {
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
-
-    if (!hasFunds(assetSelling.value, baseToken, assetSelling.id, wallet[buyer.id])(getContract(state, contractId))) return state
-    
-    const payable = calcMintPayable(assetSelling)(contract[contractId])
+  
+    // if (!hasFunds(assetSelling.value, baseToken, assetSelling.id, wallet[buyer.id])(getContract(state, contractId))) return state
 
     const { assets } = wallet[buyer.id]
 
@@ -61,15 +56,14 @@ export const mint = (
 export const burn = (
   assetBuying: LiboroAssetType,
   buyer: WalletType,
-  contractId: string
+  contractId: string,
+  payable: LiboroAssetType
 ): CommandType => {
   const execute: ExecuteType = state => {
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
-    if (!hasFunds(assetBuying.value, baseToken, assetBuying.id, wallet[buyer.id])(getContract(state, contractId))) return state
-    
-    const payable = calcBurnPayable(assetBuying)
+    // if (!hasFunds(assetBuying.value, baseToken, assetBuying.id, wallet[buyer.id])(getContract(state, contractId))) return state
 
     const { assets } = wallet[buyer.id]
 

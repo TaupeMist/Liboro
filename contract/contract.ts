@@ -67,6 +67,10 @@ export class Contract implements IContract {
     return this.table.baseToken
   }
 
+  get baseAsset() {
+    return this.table.baseAsset
+  }
+
   getState = () => {
     return {
       assets: { ...this.assets },
@@ -110,19 +114,22 @@ export class Contract implements IContract {
     return this
   }
 
-  configure = (asset: AssetHardType, token: AssetType, baseSupply = 10000, wallet?: WalletType): this => {
+  configure = (asset: AssetHardType, token: AssetType, baseAsset = 10000, wallet?: WalletType): this => {
     if (!this.chain) throw new Error('Chain does not exist. Chain must first be deployed.')
 
     this.addAsset(asset)
     this.addAsset(token)
 
-    this.table.baseSupply = baseSupply
-    this.table.baseAsset = asset
+    this.table.baseAsset = {
+      id: asset,
+      value: baseAsset,
+      marketCap: baseAsset
+    }
     this.table.baseToken = token
 
     const initialPortfolio = {
       [this.table.baseToken]: 0,
-      [this.table.baseAsset]: 100
+      [this.table.baseAsset.id]: 100
     }
 
     this.table.portfolio = {

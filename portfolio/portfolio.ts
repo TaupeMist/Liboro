@@ -1,5 +1,8 @@
 import {
-  GetPorfolioType
+  GetPorfolioType,
+  AssetHardType,
+  WalletType,
+  PortfolioType
 } from './types'
 
 import {
@@ -9,9 +12,7 @@ import {
 
 import {
   calcPortfolio,
-  calcGlobalPortfolio,
-  calcBurnPayable,
-  rebalanceBurn
+  calcGlobalPortfolio
 } from './utils'
 
 import {
@@ -20,10 +21,12 @@ import {
 } from './minting'
 
 import {
+  calcBurnPayable,
+  rebalanceBurn
+} from './burning'
+
+import {
   Contract,
-  AssetHardType,
-  WalletType,
-  PortfolioType,
   getWalletId,
   format
 } from '../contract'
@@ -37,9 +40,17 @@ export class PortfolioContract extends Contract {
       value: amount
     }
 
-    const payable = calcMintPayable(liboroAsset)(this)
+    const baseToken = this.getAsset(this.baseToken)
+    baseToken.value = this.assets[baseToken.id]
 
-    console.log('calcMintPayable', payable)
+    const payable = calcMintPayable(
+      liboroAsset,
+      this.assets[liboroAsset.id],
+      this.baseAsset,
+      baseToken
+    )(this)
+
+    console.log('calcMintPayable: result', payable)
 
     const increasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
       if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
@@ -70,7 +81,7 @@ export class PortfolioContract extends Contract {
 
     this.rebalance(increasePortfolioAsset, wallet)
 
-    this.chain.execute(mint(liboroAsset, wallet, this.id))    
+    this.chain.execute(mint(liboroAsset, wallet, this.id, payable))    
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
@@ -86,7 +97,16 @@ export class PortfolioContract extends Contract {
       ...this.getAsset(asset),
       value: amount
     }
-    const payable = calcBurnPayable(liboroAsset)
+
+    const baseToken = this.getAsset(this.baseToken)
+    baseToken.value = this.assets[baseToken.id]
+
+    const payable = calcBurnPayable(
+      liboroAsset,
+      this.assets[liboroAsset.id],
+      this.baseAsset,
+      baseToken
+    )(this)
 
     console.log('burnPayable', payable)
 
@@ -121,10 +141,14 @@ export class PortfolioContract extends Contract {
 
     this.rebalance(descreasePortfolioAsset, wallet)
 
-    this.chain.execute(burn(liboroAsset, wallet, this.id))
+    this.chain.execute(burn(liboroAsset, wallet, this.id, payable))
 
     // TODO: calc and set wallet portfolio
-    this.table.portfolio.global = calcGlobalPortfolio(wallet)(this)
+    this.table.portfolio.global = calcGlobalPortfolio(
+      this.getWallet(wallet),
+      this.getAsset(this.baseToken),
+      this.table.portfolio
+    )
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - payable.value)
@@ -136,8 +160,12 @@ export class PortfolioContract extends Contract {
   }
 
   rebalance = (getPortfolio: GetPorfolioType, wallet: WalletType): this => {
-    this.table.portfolio[getWalletId(wallet)] = calcPortfolio(getPortfolio, wallet)(this)
-    this.table.portfolio.global = calcGlobalPortfolio(wallet)(this)
+    this.table.portfolio[getWalletId(wallet)] = calcPortfolio(getPortfolio, this.getWallet(wallet))
+
+    this.table.portfolio.global = calcGlobalPortfolio(
+      this.getWallet(wallet),
+      this.getAsset(this.baseToken),
+      this.table.portfolio)
 
     return this
   }

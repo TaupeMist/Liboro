@@ -34,7 +34,7 @@ describe('Contract', () => {
     expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
     expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
 
-    expect(liboro.table.baseSupply).to.deep.equal(100)
+    expect(liboro.table.baseAsset.value).to.deep.equal(100)
   })
 
   it('can add hard assets', () => {
