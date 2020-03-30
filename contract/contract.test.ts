@@ -105,28 +105,6 @@ describe('Contract', () => {
     expect(liboro.assets.taupemist).to.deep.equal(0)
   })
 
-  it('can get wallet and asset', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-    const taupemist: WalletType = {
-      id: 'taupemist',
-      assets: {
-        usd: 1000
-      }
-    }
-
-    chain.execute(addWallet(taupemist))
-
-    new Contract('liboro')
-      .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
-
-    const { liboro } = chain.getState().contract
-
-    console.log('Liboro Wallet', liboro.getWallet(taupemist))
-    console.log('Liboro Asset', liboro.getAsset('usd'))
-  })
-
   it('can seed', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 

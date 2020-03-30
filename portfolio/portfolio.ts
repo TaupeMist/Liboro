@@ -2,9 +2,11 @@ import {
   calcPortfolio,
   calcGlobalPortfolio
 } from './utils'
+import {
+  GetPorfolioType
+} from './types'
 
 import {
-  GetPorfolioType,
   WalletType
 } from '../chain'
 

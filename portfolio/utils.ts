@@ -1,5 +1,8 @@
 import {
-  GetPorfolioType,
+  GetPorfolioType
+} from './types'
+
+import {
   AssetType as ChainAssetType,
   WalletType as ChainWalletType,
 } from '../chain'
@@ -53,12 +56,9 @@ export const flatten = (portfolio: PortfolioType): PortfolioType => {
 export const balance = (portfolio: PortfolioType): PortfolioType => {
   const assetIds = Object.keys(portfolio)
 
-  console.log('balance', portfolio)
-
   const intoPortfolio = (acc: PortfolioType, assetId: string): PortfolioType => {
     const total = getPortfolioTotal(portfolio, [assetId])
     const value = total === 0 ? 100 : format(portfolio[assetId] / total)
-    console.log('balance.intoPortfolio', assetId, portfolio[assetId], value)
 
     return {
       ...acc,
@@ -81,18 +81,12 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAss
     [assetId]: portfolio[assetId]
   })
 
-  console.log('portfolio', portfolio)
-
   const portfolioToBalance = assetIds.reduce(intoPortfolio, {} as PortfolioType)
 
   if (isPortfolioValid(portfolioToBalance))
     throw new Error(`Portfolio is yet to be balanced/flattened therefor, should be invalid. ${JSON.stringify(portfolioToBalance)}`)
 
-  console.log('portfolioMinusAsset: unbalanced', portfolioToBalance)
-
   const total = getPortfolioTotal(portfolioToBalance)
-
-  console.log('total', total)
     
   return total === 0 ? flatten(portfolioToBalance) : balance(portfolioToBalance)
 }
@@ -116,8 +110,6 @@ export const calcGlobalPortfolio = (
   const currWalletPortfolio = getPortfolio
     ? calcPortfolio(getPortfolio, wallet)
     : wallet.portfolio
-
-  console.log('calcGlobalPortfolio', currWalletPortfolio)
 
   const weight = calcRebalanceWeight(wallet, baseToken, portfolio)
   const weightNeg = 1 - weight

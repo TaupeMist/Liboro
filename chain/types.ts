@@ -35,8 +35,6 @@ export type TableType = {
   }
 }
 
-export type GetPorfolioType = (portfolio: PortfolioType) => PortfolioType
-
 export type StateType = {
   contract: {
     [K: string]: Contract
@@ -52,8 +50,6 @@ export type RebalanceType = {
     value: number
   }
 }
-
-export type GetRebalanceType = (portfolio: PortfolioType) => RebalanceType
 
 export interface StoreConfig {
   initialState?: StateType,

@@ -41,14 +41,9 @@ export const calcMintPayable = (
   baseAsset: AssetType,
   baseToken: AssetType
 ) => (contract: Contract): AssetType => {
-  // console.log('calcMintPayable', deposit, contractAsset, baseAsset, baseToken)
-
   const contractAssetTotal = baseAsset.compare(deposit).total
 
   const depositRatio = getDepositRatio(deposit, contractAssetTotal, contract)
-
-  // console.log('calcMintPayable: contractAssetTotal', contractAssetTotal)
-  // console.log('calcMintPayable: depositRatio', depositRatio)
 
   return {
     ...deposit,
@@ -71,22 +66,14 @@ export const rebalanceMint = (
 ): PortfolioType => {
   const ratio = format(payable.value / (payable.value + wallet.assets[baseToken.id]))
 
-  console.log('ratio', ratio)
-
   const increase = format(wallet.assets[baseToken.id] * ratio)
 
-  console.log('increase', increase)
-
   const portfolioMinusAsset = getPortfolioMinusAsset(wallet.portfolio, minting.id)
-
-  console.log('portfolioMinusAsset', portfolioMinusAsset)
 
   const intoPortfolio = (acc: PortfolioType, assetId: string): PortfolioType => {
     const value = assetId === minting.id
       ? format(wallet.portfolio[assetId] + increase)
       : format(wallet.portfolio[assetId] - asDecimal(portfolioMinusAsset[assetId]) * increase)
-
-    console.log('intoPortfolio', assetId, wallet.portfolio[assetId], value)
 
     if (value > 100 || value < 0)
       throw new Error(`Value must be between 0 and 100. Value: ${value}`)

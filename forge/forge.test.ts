@@ -110,11 +110,12 @@ describe('Forge', () => {
       .mint(100, 'usd', taupemist)
 
     const { liboro } = chain.getState().contract
-    
-    expect(liboro.table.portfolio.taupemist).to.deep.equal({
-      usd: 78.5881,
-      liborodollar: 21.4119
-    })
+
+    expect(liboro.table.portfolio.taupemist.usd).to.equal(78.5881)
+    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(21.4119)
+
+    expect(liboro.table.portfolio.global.usd).to.equal(78.5881)
+    expect(liboro.table.portfolio.global.liborodollar).to.equal(21.4119)
   })
 
   it('can rebalance when burning', () => {
@@ -147,6 +148,46 @@ describe('Forge', () => {
 
     expect(wallet.taupemist.assets.usd).to.equal(925)
     expect(wallet.taupemist.assets.liborodollar).to.equal(45.45)
+
+    expect(liboro.table.portfolio.taupemist.usd).to.equal(0)
+    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(100)
+  })
+
+  it('can rebalance when burning [afterwards]', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const taupemist: WalletType = {
+      id: 'taupemist',
+      assets: {
+        usd: 1000
+      }
+    }
+
+    chain.execute(addWallet(taupemist))
+
+    new ForgeContract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 1000)
+      .mint(100, 'usd', taupemist)
+      .rebalance(() => ({
+        liborodollar: 50,
+        usd: 50
+      }), taupemist)
+      .burn(45.45, 'usd', taupemist)
+      .rebalance(() => ({
+        liborodollar: 0,
+        usd: 100
+      }), taupemist)
+      .burn(45.45, 'usd', taupemist)
+
+    const { liboro } = chain.getState().contract
+    const { wallet } = chain.getState()
+
+    expect(liboro.table.asset.usd.marketCap).to.equal(0)
+    expect(liboro.table.baseToken.marketCap).to.equal(0)
+
+    expect(wallet.taupemist.assets.usd).to.equal(1000)
+    expect(wallet.taupemist.assets.liborodollar).to.equal(0)
 
     expect(liboro.table.portfolio.taupemist.usd).to.equal(0)
     expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(100)

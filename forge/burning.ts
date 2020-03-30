@@ -31,19 +31,11 @@ export const rebalanceBurn = (
   portfolio: PortfolioType,
   contractPortfolio: PortfolioType,
   asset: AssetType,
-  wallet: WalletType,
-  payable: AssetType,
-  baseToken: AssetType
+  wallet: WalletType
 ): PortfolioType => {
-  console.log('rebalanceBurn', portfolio, asset, wallet, payable, baseToken)
-
   const decrease = format(contractPortfolio[asset.id] * wallet.ratioOfMarketCap)
 
-  console.log('decrease', decrease)
-
   const portfolioMinusAsset = getPortfolioMinusAsset(portfolio, asset.id)
-
-  console.log('portfolioMinusAsset', portfolioMinusAsset)
 
   if (portfolioMinusAsset[asset.id] !== undefined)
     throw new Error(`Asset must be removed from portfolio. Asset: ${asset}. Portfolio: ${JSON.stringify(portfolioMinusAsset)}`)
@@ -52,8 +44,6 @@ export const rebalanceBurn = (
     const value = assetId === asset.id
       ? format(portfolio[assetId] - decrease)
       : format(portfolio[assetId] + asDecimal(portfolioMinusAsset[assetId]) * decrease)
-
-    console.log('intoPortfolio', assetId, portfolio[assetId], value)
 
     if (value > 100 || value < 0)
       throw new Error(`Value must be between 0 and 100. Value: ${value}`)
