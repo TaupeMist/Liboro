@@ -45,7 +45,6 @@ export class PortfolioContract extends Contract {
 
     const payable = calcMintPayable(
       liboroAsset,
-      this.assets[liboroAsset.id],
       this.baseAsset,
       baseToken
     )(this)

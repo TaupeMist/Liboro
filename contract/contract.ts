@@ -68,7 +68,7 @@ export class Contract implements IContract {
   }
 
   get baseAsset() {
-    return this.table.baseAsset
+    return this.getAsset(this.table.baseAsset.id, this.table.baseAsset)
   }
 
   getState = () => {
@@ -87,11 +87,11 @@ export class Contract implements IContract {
   }
 
   // TODO: return additonal asset information and create type
-  getAsset = (asset: AssetType): LiboroAssetType => {
+  getAsset = (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
     // TODO: return global market cap
     // TODO: return price index based global portfolio
 
-    return getLiboroAsset(this.getState())(asset)
+    return getLiboroAsset(this.getState())(asset, prevAsset)
   }
 
   deploy = (chain: StoreType): this => {
@@ -120,11 +120,12 @@ export class Contract implements IContract {
     this.addAsset(asset)
     this.addAsset(token)
 
-    this.table.baseAsset = {
+    this.table.baseAsset = this.getAsset(asset, {
       id: asset,
       value: baseAsset,
       marketCap: baseAsset
-    }
+    })
+
     this.table.baseToken = token
 
     const initialPortfolio = {

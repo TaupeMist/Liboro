@@ -1,5 +1,9 @@
 import { Contract } from '../contract'
 
+import {
+  ComparisonType
+} from '../contract/types'
+
 export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
 
 export type AssetType = AssetHardType | string
@@ -7,7 +11,8 @@ export type AssetType = AssetHardType | string
 export type LiboroAssetType = {
   id: AssetType,
   value: number,
-  marketCap: number
+  marketCap: number,
+  compare?: (targetAsset: LiboroAssetType) => ComparisonType
 }
 
 export type WalletType = {

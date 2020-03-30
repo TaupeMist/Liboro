@@ -4,10 +4,15 @@ export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
 
 export type AssetType = AssetHardType | string
 
+export type ComparisonType = {
+  total: number
+}
+
 export type LiboroAssetType = {
   id: AssetType,
   value: number,
-  marketCap: number
+  marketCap: number,
+  compare?: (targetAsset: LiboroAssetType) => ComparisonType
 }
 
 export type WalletType = {
@@ -43,7 +48,9 @@ export type TableType = {
     [A in AssetType]: {
       marketCap: number
     }
-  }
+  },
+  baseAsset: LiboroAssetType,
+  baseToken: AssetType
 }
 
 export type ContractStateType = {

@@ -2,7 +2,8 @@ import {
   AssetType,
   WalletType,
   LiboroWalletType,
-  LiboroAssetType
+  LiboroAssetType,
+  ComparisonType
 } from './types'
 
 import {
@@ -26,14 +27,44 @@ export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType
   }
 }
 
-export const getLiboroAsset = (state) => (asset: AssetType): LiboroAssetType => {
+/**
+ * Get the next total of a contract's asset
+ * 
+ * @param baseAsset any virtual or pre-defined supply of the asset
+ * @param assetValue the contract's balance of the asset
+ * @param targetAsset the target amount to be added to the contract's balance of the asset
+ */
+export const getAssetTotal = (
+  baseAsset: LiboroAssetType,
+  assetValue: number,
+  targetAsset?: LiboroAssetType
+) => {
+  return baseAsset.value + assetValue + (targetAsset ? targetAsset.value : 0)
+}
+
+export const getLiboroAsset = (state) => (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
   console.log('state.table.portfolio', state.table.portfolio, asset)
-  return {
-    ...state.table.asset[asset],
-    id: asset,
-    value: state.assets[asset],
-    marketCap: state.table.asset[asset].marketCap || 0
+
+  const nextAsset = prevAsset
+    ? {
+      ...state.table.asset[asset],
+      ...prevAsset,
+    }
+    : {
+      ...state.table.asset[asset],
+      id: asset,
+      value: state.assets[asset],
+    }
+
+  console.log('state.baseAsset', state)
+
+  nextAsset.compare = (targetAsset: LiboroAssetType): ComparisonType => {
+    return {
+      total: getAssetTotal(state.table.baseAsset, state.assets[asset], targetAsset)
+    }
   }
+
+  return nextAsset
 }
   
 

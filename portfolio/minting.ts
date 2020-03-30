@@ -16,21 +16,6 @@ import {
 } from '../contract'
 
 /**
- * Get the next total of a contract's asset
- * 
- * @param baseAsset any virtual or pre-defined supply of the asset
- * @param assetValue the contract's balance of the asset
- * @param deposit the deposit amount to be added to the contract's balance of the asset
- */
-export const getContractAssetTotal = (
-  baseAsset: LiboroAssetType,
-  assetValue: number,
-  deposit: LiboroAssetType
-) => {
-  return baseAsset.value + assetValue + deposit.value
-}
-
-/**
  * Get the decimal ratio increase of the deposit towards the contract's asset balance
  * 
  * @param deposit the deposit amount to be added to the contract's balance
@@ -56,18 +41,17 @@ export const getDepositRatio = (
 
 export const calcMintPayable = (
   deposit: LiboroAssetType,
-  contractAsset: number,
   baseAsset: LiboroAssetType,
   baseToken: LiboroAssetType
 ) => (contract: Contract): LiboroAssetType => {
-  console.log('calcMintPayable', deposit, contractAsset, baseAsset, baseToken)
+  // console.log('calcMintPayable', deposit, contractAsset, baseAsset, baseToken)
 
-  const contractAssetTotal = getContractAssetTotal(baseAsset, contractAsset, deposit)
+  const contractAssetTotal = baseAsset.compare(deposit).total
 
   const depositRatio = getDepositRatio(deposit, contractAssetTotal, contract)
 
-  console.log('calcMintPayable: contractAssetTotal', contractAssetTotal)
-  console.log('calcMintPayable: depositRatio', depositRatio)
+  // console.log('calcMintPayable: contractAssetTotal', contractAssetTotal)
+  // console.log('calcMintPayable: depositRatio', depositRatio)
 
   return {
     ...deposit,
