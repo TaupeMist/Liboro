@@ -40,19 +40,16 @@ export class PortfolioContract extends Contract {
       value: amount
     }
 
-    const baseToken = this.getAsset(this.baseToken)
-    baseToken.value = this.assets[baseToken.id]
-
     const payable = calcMintPayable(
       liboroAsset,
       this.baseAsset,
-      baseToken
+      this.baseToken
     )(this)
 
     console.log('calcMintPayable: result', payable)
 
     const increasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
-      if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
+      if (!wallet.assets[this.baseToken.id] || wallet.assets[this.baseToken.id] === undefined)
         return portfolio
 
       console.log('asset', asset, wallet.assets)
@@ -65,7 +62,7 @@ export class PortfolioContract extends Contract {
         this.getAsset(asset),
         this.getWallet(wallet),
         payable,
-        this.getAsset(this.baseToken)
+        this.baseToken
       )
 
       console.log('result', nextPortfolio)
@@ -86,7 +83,10 @@ export class PortfolioContract extends Contract {
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
 
     // TODO: move calc to utils
-    this.table.asset[this.table.baseToken].marketCap = format(this.table.asset[this.table.baseToken].marketCap + payable.value)
+    this.baseToken = {
+      ...this.baseToken,
+      marketCap: this.baseToken.marketCap + payable.value
+    }
 
     return this
   }
@@ -97,26 +97,23 @@ export class PortfolioContract extends Contract {
       value: amount
     }
 
-    const baseToken = this.getAsset(this.baseToken)
-    baseToken.value = this.assets[baseToken.id]
-
     const payable = calcBurnPayable(
       liboroAsset,
       this.assets[liboroAsset.id],
       this.baseAsset,
-      baseToken
+      this.baseToken
     )(this)
 
     console.log('burnPayable', payable)
 
     const descreasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
-      if (!wallet.assets[this.baseToken] || wallet.assets[this.baseToken] === undefined)
+      if (!wallet.assets[this.baseToken.id] || wallet.assets[this.baseToken.id] === undefined)
         return portfolio
 
       console.log('descreasePortfolioAsset', this.getWallet(wallet))
 
       // When wallet portfolio cannot be decreased
-      if (this.getWallet(wallet).portfolio[this.baseToken] === 0)
+      if (this.getWallet(wallet).portfolio[this.baseToken.id] === 0)
         return portfolio
 
       console.log('asset', asset, wallet.assets)
@@ -126,7 +123,8 @@ export class PortfolioContract extends Contract {
         this.getAsset(asset),
         this.getWallet(wallet),
         payable,
-        this.getAsset(this.baseToken))
+        this.baseToken
+      )
 
       console.log('result', nextPortfolio)
 
@@ -145,7 +143,7 @@ export class PortfolioContract extends Contract {
     // TODO: calc and set wallet portfolio
     this.table.portfolio.global = calcGlobalPortfolio(
       this.getWallet(wallet),
-      this.getAsset(this.baseToken),
+      this.baseToken,
       this.table.portfolio
     )
 
@@ -153,7 +151,10 @@ export class PortfolioContract extends Contract {
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - payable.value)
 
     // TODO: move calc to utils
-    this.table.asset[this.table.baseToken].marketCap = format(this.table.asset[this.table.baseToken].marketCap - amount)
+    this.baseToken = {
+      ...this.baseToken,
+      marketCap: this.baseToken.marketCap - amount
+    }
 
     return this
   }
@@ -163,8 +164,9 @@ export class PortfolioContract extends Contract {
 
     this.table.portfolio.global = calcGlobalPortfolio(
       this.getWallet(wallet),
-      this.getAsset(this.baseToken),
-      this.table.portfolio)
+      this.baseToken,
+      this.table.portfolio
+    )
 
     return this
   }

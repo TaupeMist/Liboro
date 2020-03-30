@@ -31,8 +31,16 @@ describe('Contract', () => {
 
     const { liboro } = chain.getState().contract
 
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
+    expect(liboro.table.asset.usd).to.deep.equal({
+      id: 'usd',
+      marketCap: 0,
+      value: 0
+    })
+    expect(liboro.table.asset.liborodollar).to.deep.equal({
+      id: 'liborodollar',
+      marketCap: 0,
+      value: 0
+    })
 
     expect(liboro.table.baseAsset.value).to.deep.equal(100)
   })
@@ -47,9 +55,21 @@ describe('Contract', () => {
 
     const { liboro } = chain.getState().contract
 
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.eos).to.deep.equal({ marketCap: 0 })
+    expect(liboro.table.asset.usd).to.deep.equal({
+      id: 'usd',
+      marketCap: 0,
+      value: 0
+    })
+    expect(liboro.table.asset.liborodollar).to.deep.equal({
+      id: 'liborodollar',
+      marketCap: 0,
+      value: 0
+    })
+    expect(liboro.table.asset.eos).to.deep.equal({
+      id: 'eos',
+      marketCap: 0,
+      value: 0
+    })
 
     expect(liboro.assets.usd).to.deep.equal(0)
     expect(liboro.assets.eos).to.deep.equal(0)
@@ -65,9 +85,21 @@ describe('Contract', () => {
 
     const { liboro } = chain.getState().contract
 
-    expect(liboro.table.asset.usd).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.liborodollar).to.deep.equal({ marketCap: 0 })
-    expect(liboro.table.asset.taupemist).to.deep.equal({ marketCap: 0 })
+    expect(liboro.table.asset.usd).to.deep.equal({
+      id: 'usd',
+      marketCap: 0,
+      value: 0
+    })
+    expect(liboro.table.asset.liborodollar).to.deep.equal({
+      id: 'liborodollar',
+      marketCap: 0,
+      value: 0
+    })
+    expect(liboro.table.asset.taupemist).to.deep.equal({
+      id: 'taupemist',
+      marketCap: 0,
+      value: 0
+    })
 
     expect(liboro.assets.liborodollar).to.deep.equal(0)
     expect(liboro.assets.taupemist).to.deep.equal(0)

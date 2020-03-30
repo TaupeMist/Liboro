@@ -66,7 +66,7 @@ export const seed = (
     const { baseToken } = getTable(state, contractId)
 
     contract[contractId].assets[assetSeeding] = 0
-    contract[contractId].assets[baseToken] = 0
+    contract[contractId].assets[baseToken.id] = 0
 
     return { ...state, contract }
   }

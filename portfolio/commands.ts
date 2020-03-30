@@ -32,7 +32,7 @@ export const mint = (
 
     contract[contractId].assets[assetSelling.id] = format(contract[contractId].assets[assetSelling.id] + assetSelling.value)
 
-    wallet[buyer.id].assets[baseToken] = format((assets[baseToken] || 0) + payable.value)
+    wallet[buyer.id].assets[baseToken.id] = format((assets[baseToken.id] || 0) + payable.value)
       
     return { ...state, contract, wallet }
   }
@@ -42,7 +42,7 @@ export const mint = (
     const { baseToken } = getTable(state, contractId)
 
     contract[contractId].assets[assetSelling.id] = 0
-    contract[contractId].assets[baseToken] = 0
+    contract[contractId].assets[baseToken.id] = 0
 
     return { ...state, contract }
   }
@@ -67,7 +67,7 @@ export const burn = (
 
     const { assets } = wallet[buyer.id]
 
-    wallet[buyer.id].assets[baseToken] = format(assets[baseToken] - assetBuying.value)
+    wallet[buyer.id].assets[baseToken.id] = format(assets[baseToken.id] - assetBuying.value)
 
     contract[contractId].assets[assetBuying.id] = format(contract[contractId].assets[assetBuying.id] - payable.value)
 

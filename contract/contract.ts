@@ -56,15 +56,12 @@ export class Contract implements IContract {
     }
   }
 
-  set baseToken(baseToken: string) {
-    this.table = {
-      ...this.table,
-      baseToken
-    }
+  get baseToken() {
+    return this.getAsset(this.table.baseToken.id, this.table.baseToken)
   }
 
-  get baseToken() {
-    return this.table.baseToken
+  set baseToken(baseToken: LiboroAssetType) {
+    this.table.baseToken = baseToken
   }
 
   get baseAsset() {
@@ -126,10 +123,14 @@ export class Contract implements IContract {
       marketCap: baseAsset
     })
 
-    this.table.baseToken = token
+    this.table.baseToken = this.getAsset(asset, {
+      id: token,
+      value: 0,
+      marketCap: 0
+    })
 
     const initialPortfolio = {
-      [this.table.baseToken]: 0,
+      [this.table.baseToken.id]: 0,
       [this.table.baseAsset.id]: 100
     }
 
@@ -182,6 +183,8 @@ export class Contract implements IContract {
     if (asset) {
       if (!this.table.asset[asset])
         this.table.asset[asset] = {
+          id: asset,
+          value: 0,
           marketCap: 0
         }
 

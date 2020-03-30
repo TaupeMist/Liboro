@@ -45,12 +45,10 @@ export type TableType = {
     [K: string]: PortfolioType
   },
   asset?: {
-    [A in AssetType]: {
-      marketCap: number
-    }
+    [A in AssetType]: LiboroAssetType
   },
   baseAsset: LiboroAssetType,
-  baseToken: AssetType
+  baseToken: LiboroAssetType
 }
 
 export type ContractStateType = {

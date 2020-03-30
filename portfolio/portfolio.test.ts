@@ -206,7 +206,7 @@ describe('Portfolio', () => {
     let { wallet } = chain.getState()
 
     expect(liboro.table.asset.usd.marketCap).to.equal(50)
-    expect(liboro.table.asset.liborodollar.marketCap).to.equal(47.6)
+    expect(liboro.table.baseToken.marketCap).to.equal(47.6)
 
     expect(wallet.taupemist.assets.usd).to.equal(950)
     expect(wallet.taupemist.assets.liborodollar).to.equal(47.6)
@@ -222,7 +222,7 @@ describe('Portfolio', () => {
     wallet = chain.getState().wallet
 
     expect(tiny.table.asset.usd.marketCap).to.equal(50)
-    expect(tiny.table.asset.tinydollar.marketCap).to.equal(33.33)
+    expect(tiny.table.baseToken.marketCap).to.equal(33.33)
 
     expect(wallet.taupemist.assets.usd).to.equal(900)
     expect(wallet.taupemist.assets.tinydollar).to.equal(33.33)
@@ -238,7 +238,7 @@ describe('Portfolio', () => {
     wallet = chain.getState().wallet
 
     expect(large.table.asset.usd.marketCap).to.equal(100)
-    expect(large.table.asset.largedollar.marketCap).to.equal(99)
+    expect(large.table.baseToken.marketCap).to.equal(99)
 
     expect(large.assets.usd).to.equal(100)
 
