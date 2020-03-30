@@ -1,11 +1,4 @@
 import {
-  GetPorfolioType,
-  AssetHardType,
-  WalletType,
-  PortfolioType
-} from './types'
-
-import {
   mint,
   burn
 } from './commands'
@@ -26,9 +19,16 @@ import {
 } from './burning'
 
 import {
+  GetPorfolioType,
+  AssetHardType,
+  WalletType,
+  PortfolioType
+} from '../chain'
+
+import {
   Contract,
   getWalletId,
-  format
+  format,
 } from '../contract'
 
 export class PortfolioContract extends Contract {
@@ -92,6 +92,11 @@ export class PortfolioContract extends Contract {
   }
 
   burn = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
+    const burner = this.getWallet(wallet)
+
+    if (!burner.canBurn(amount, asset))
+      throw new Error(`User ${wallet.id} cannot burn ${amount} of ${this.baseToken.id} to recieve ${asset}`)
+
     const withdrawal = {
       ...this.getAsset(asset),
       value: amount
@@ -100,7 +105,8 @@ export class PortfolioContract extends Contract {
     const payable = calcBurnPayable(
       withdrawal,
       this.assets[withdrawal.id],
-      this.baseToken
+      this.baseToken,
+      this.getWallet(wallet)
     )
 
     console.log('burnPayable', payable)

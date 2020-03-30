@@ -1,8 +1,4 @@
-import { Contract } from './contract'
-
-export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
-
-export type AssetType = AssetHardType | string
+import * as chain from '../chain/types'
 
 export type ComparisonType = {
   total: number,
@@ -10,35 +6,33 @@ export type ComparisonType = {
 }
 
 export type LiboroAssetType = {
-  id: AssetType,
+  id: chain.AssetType,
   value: number,
   marketCap: number,
   compare?: (targetAsset: LiboroAssetType) => ComparisonType
 }
 
-export type WalletType = {
-  id: string,
-  assets: {
-    [A in AssetType]?: number
-  }
+export type LiboroWalletReserveType = LiboroAssetType & {
+  ratio: number,
+  reserve: number,
+  baseTokenValue: number
 }
 
-export type LiboroWalletType = WalletType & {
+export type LiboroWalletPortfolioType = {
+  [A in chain.AssetType]?: LiboroWalletReserveType
+}
+
+export type LiboroWalletType = chain.WalletType & {
   portfolio: PortfolioType,
-  reserves?: any,
-  ratioOfMarketCap?: number
-}
-
-export type ContractType = {
-  id: string,
-  assets: {
-    [A in AssetType]?: number
-  }
+  reserves?: LiboroWalletPortfolioType,
+  ratioOfMarketCap?: number,
+  canBurn?: (amount: number, assetId: chain.AssetHardType) => boolean,
+  baseTokenValue?: number
 }
 
 // TODO: change from number to LiboroAssetType
 export type PortfolioType = {
-  [A in AssetType]?: number
+  [A in chain.AssetType]?: number
 }
 
 export type TableType = {
@@ -48,7 +42,7 @@ export type TableType = {
     [K: string]: PortfolioType
   },
   asset?: {
-    [A in AssetType]: LiboroAssetType
+    [A in chain.AssetType]: LiboroAssetType
   },
   baseAsset: LiboroAssetType,
   baseToken: LiboroAssetType
@@ -56,40 +50,7 @@ export type TableType = {
 
 export type ContractStateType = {
   assets: {
-    [A in AssetType]?: number
+    [A in chain.AssetType]?: number
   },
   table: TableType
-}
-
-export type StateType = {
-  contract: {
-    [K: string]: Contract
-  },
-  wallet: {
-    [K: string]: WalletType
-  }
-}
-
-export interface StoreConfig {
-  initialState?: StateType,
-  onMutation?: (state: StateType) => void
-}
-
-export type ExecuteType = (state: StateType) => StateType
-
-export type UndoType = (state?: StateType) => StateType
-
-export type CommandType = {
-  execute: ExecuteType,
-  undo: UndoType
-}
-
-export type StoreType = {
-  execute: (command: CommandType) => void,
-  undo: () => void,
-  select: (func: (StateType) => StateType) => StateType,
-  getState: () => StateType,
-  getStateHistory: () => StateType[],
-  getCommandHistory: () => CommandType[],
-  debug: (command?: CommandType) => {}
 }

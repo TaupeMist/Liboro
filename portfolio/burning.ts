@@ -1,7 +1,6 @@
 import {
-  LiboroAssetType,
   PortfolioType
-} from './types'
+} from '../chain'
 
 import {
   getPortfolioMinusAsset
@@ -11,18 +10,20 @@ import {
   format,
   asDecimal,
   LiboroWalletType,
+  LiboroAssetType
 } from '../contract'
 
 export const calcBurnPayable = (
   withdrawal: LiboroAssetType,
   contractAsset: number,
-  baseToken: LiboroAssetType
+  baseToken: LiboroAssetType,
+  burner: LiboroWalletType
 ): LiboroAssetType => {
   const { percentageOfMarketCap } = baseToken.compare(withdrawal)
 
   return {
     ...withdrawal,
-    value: format(percentageOfMarketCap * contractAsset)
+    value: format(percentageOfMarketCap * contractAsset * burner.reserves[withdrawal.id].ratio)
   } 
 }
 

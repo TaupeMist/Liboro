@@ -1,17 +1,14 @@
 import {
-  calcBurnPayable
-} from './burning'
-
-import {
   CommandType,
   ExecuteType,
   UndoType,
   WalletType,
+} from '../chain'
+
+import {
   LiboroAssetType,
   format,
-  hasFunds,
-  getTable,
-  getContract,
+  getTable
 } from '../contract'
 
 export const mint = (

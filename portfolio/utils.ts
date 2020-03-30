@@ -2,14 +2,14 @@ import {
   GetPorfolioType,
   AssetType,
   WalletType,
-  LiboroAssetType,
-  PortfolioType,
-  TableType
-} from './types'
+} from '../chain'
 
 import {
   format,
-  LiboroWalletType
+  LiboroWalletType,
+  LiboroAssetType,
+  PortfolioType,
+  TableType
 } from '../contract'
 
 export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: AssetType[] = []): number => {

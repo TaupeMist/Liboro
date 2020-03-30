@@ -1,11 +1,14 @@
-import { addContract, IContract } from '../chain';
-
 import {
+  addContract,
+  IContract,
   AssetHardType,
   StoreType,
   AssetType,
   WalletType,
-  ContractStateType,
+  ContractStateType
+} from '../chain';
+
+import {
   TableType,
   LiboroWalletType,
   LiboroAssetType

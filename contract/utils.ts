@@ -2,10 +2,10 @@ import {
   AssetType,
   WalletType,
   ContractType
-} from './types'
+} from '../chain'
 
 import {
-  Contract
+  Contract,
 } from './contract'
 
 export const format = (num: number):number => +num.toFixed(4);

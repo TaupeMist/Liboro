@@ -1,16 +1,20 @@
 import {
-  AssetType,
-  WalletType,
   LiboroWalletType,
   LiboroAssetType,
   ComparisonType,
-  PortfolioType
+  LiboroWalletPortfolioType
 } from './types'
 
 import {
   getWalletId,
   format
 } from './utils'
+
+import {
+  AssetType,
+  WalletType,
+  AssetHardType
+} from '../chain'
 
 export const getWallet = (state): WalletType => {
   return state.wallet
@@ -21,7 +25,6 @@ export const getPortfolio = (state): LiboroWalletType => {
 }
 
 export const getWalletRatioOfMarketCap = (state) => (wallet: LiboroWalletType) => {
-  console.log('getWalletRatioOfMarketCap', wallet)
   const walletBaseTokenValue = wallet.assets[state.table.baseToken.id]
 
   return walletBaseTokenValue
@@ -29,23 +32,46 @@ export const getWalletRatioOfMarketCap = (state) => (wallet: LiboroWalletType) =
     : 0
 }
 
-export const getReserve = (state) => (wallet: LiboroWalletType, assetId: AssetType): number => {
-  return format(wallet.ratioOfMarketCap * state.table.asset[assetId].marketCap)
+export const getPortfolioRatio = (wallet: LiboroWalletType, assetId: AssetType) => {
+  return wallet.portfolio[assetId] / 100
 }
 
-export const getReserves = (state) => (wallet: LiboroWalletType): LiboroWalletType => {
+export const getReserve = (state) => (wallet: LiboroWalletType, assetId: AssetType): number => {
+  return format(wallet.ratioOfMarketCap * state.table.asset[assetId].marketCap * getPortfolioRatio(wallet, assetId))
+}
+
+export const getReserves = (state) => (wallet: LiboroWalletType): LiboroWalletPortfolioType => {
   const assetIds = Object.keys(wallet.portfolio)
 
-  const intoPortfolio = (acc: LiboroWalletType, assetId: string): LiboroWalletType => ({
-    ...acc,
-    [assetId]: {
-      ...getLiboroAsset(state)(assetId),
-      reserve: getReserve(state)(wallet, assetId)
-    }
-  })
+  const intoPortfolio = (acc: LiboroWalletPortfolioType, assetId: string): LiboroWalletPortfolioType => {
+    const liboroAsset = getLiboroAsset(state)(assetId)
+    const value = wallet.portfolio[assetId]
+    const marketCap = assetId === state.table.baseToken.id
+      ? state.table.baseToken.marketCap
+      : state.table.asset[assetId].marketCap
+    const ratio = getPortfolioRatio(wallet, assetId)
+    const reserve = getReserve(state)(wallet, assetId)
+    const baseTokenValue = ratio * wallet.assets[state.table.baseToken.id]
 
-  return assetIds.reduce(intoPortfolio, {} as LiboroWalletType)
+    return {
+      ...acc,
+      [assetId]: {
+        ...liboroAsset,
+        value,
+        marketCap,
+        ratio,
+        reserve,
+        baseTokenValue
+      }
+    }
+  }
+
+  return assetIds.reduce(intoPortfolio, {})
 }
+
+export const getCanBurn = (wallet: LiboroWalletType) => (amount: number, assetId: AssetHardType): boolean => {
+  return wallet.reserves[assetId].baseTokenValue >= amount
+} 
 
 export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType => {
   const portfolio = getPortfolio(state)[getWalletId(wallet)] || {}
@@ -57,6 +83,7 @@ export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType
 
   liboroWallet.ratioOfMarketCap = getWalletRatioOfMarketCap(state)(liboroWallet)
   liboroWallet.reserves = getReserves(state)(liboroWallet)
+  liboroWallet.canBurn = getCanBurn(liboroWallet)
 
   return liboroWallet
 }
@@ -95,8 +122,6 @@ export const getComparison = (state) => (asset: LiboroAssetType, targetAsset: Li
 }
 
 export const getLiboroAsset = (state) => (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
-  console.log('state.table.portfolio', state.table.portfolio, asset)
-
   const predefinedAsset = {
     ...state.table.asset[asset],
     ...prevAsset

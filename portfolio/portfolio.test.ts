@@ -155,8 +155,7 @@ describe('Portfolio', () => {
     const taupemist: WalletType = {
       id: 'taupemist',
       assets: {
-        usd: 1000,
-        eos: 1000
+        usd: 1000
       }
     }
 
@@ -170,7 +169,7 @@ describe('Portfolio', () => {
         liborodollar: 50,
         usd: 50
       }), taupemist)
-      .burn(90.9, 'usd', taupemist)
+      .burn(45.45, 'usd', taupemist)
 
     console.log('end')
 
@@ -178,11 +177,15 @@ describe('Portfolio', () => {
     const { wallet } = chain.getState()
 
     console.log('can rebalance when burning', wallet, liboro.assets, liboro.table)
-    
-    expect(liboro.table.portfolio.taupemist).to.deep.equal({
-      liborodollar: 100,
-      usd: 0
-    })
+
+    expect(liboro.table.asset.usd.marketCap).to.equal(75)
+    expect(liboro.table.baseToken.marketCap).to.equal(45.45)
+
+    expect(wallet.taupemist.assets.usd).to.equal(925)
+    expect(wallet.taupemist.assets.liborodollar).to.equal(45.45)
+
+    expect(liboro.table.portfolio.taupemist.usd).to.equal(0)
+    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(100)
   })
 
   it('can mint', () => {

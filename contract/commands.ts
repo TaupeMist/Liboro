@@ -1,12 +1,5 @@
 import {
-  CommandType,
-  AssetHardType,
-  ExecuteType,
-  UndoType,
-  AssetType,
-  WalletType,
-  ContractStateType,
-  StateType
+  ContractStateType
 } from './types'
 
 import {
@@ -16,6 +9,16 @@ import {
 import {
   Contract
 } from './contract'
+
+import {
+  CommandType,
+  AssetHardType,
+  ExecuteType,
+  UndoType,
+  AssetType,
+  WalletType,
+  StateType
+} from '../chain'
 
 export const getContract = (state: StateType, id: string): Contract => state.contract[id]
 

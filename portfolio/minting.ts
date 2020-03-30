@@ -1,9 +1,4 @@
 import {
-  LiboroAssetType,
-  PortfolioType
-} from './types'
-
-import {
   getPortfolioMinusAsset
 } from './utils'
 
@@ -13,6 +8,8 @@ import {
   getValue,
   asDecimal,
   LiboroWalletType,
+  LiboroAssetType,
+  PortfolioType
 } from '../contract'
 
 /**
