@@ -1,5 +1,4 @@
 import {
-  LiboroWalletType,
   LiboroAssetType,
   PortfolioType
 } from './types'
@@ -10,7 +9,8 @@ import {
 
 import {
   format,
-  asDecimal
+  asDecimal,
+  LiboroWalletType,
 } from '../contract'
 
 export const calcBurnPayable = (
@@ -28,17 +28,15 @@ export const calcBurnPayable = (
 
 export const rebalanceBurn = (
   portfolio: PortfolioType,
+  contractPortfolio: PortfolioType,
   asset: LiboroAssetType,
   wallet: LiboroWalletType,
   payable: LiboroAssetType,
   baseToken: LiboroAssetType
 ): PortfolioType => {
   console.log('rebalanceBurn', portfolio, asset, wallet, payable, baseToken)
-  const ratio = asset.compare(payable).percentageOfMarketCap
 
-  console.log('ratio', ratio)
-
-  const decrease = format(wallet.assets[baseToken.id] * ratio)
+  const decrease = format(contractPortfolio[asset.id] * wallet.ratioOfMarketCap)
 
   console.log('decrease', decrease)
 

@@ -164,13 +164,13 @@ describe('Portfolio', () => {
 
     new PortfolioContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure('usd', 'liborodollar', 1000)
       .mint(100, 'usd', taupemist)
       .rebalance(() => ({
         liborodollar: 50,
         usd: 50
       }), taupemist)
-      .burn(50, 'usd', taupemist)
+      .burn(90.9, 'usd', taupemist)
 
     console.log('end')
 

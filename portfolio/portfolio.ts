@@ -119,6 +119,7 @@ export class PortfolioContract extends Contract {
 
       const nextPortfolio = rebalanceBurn(
         portfolio,
+        this.table.portfolio.global,
         this.getAsset(asset),
         this.getWallet(wallet),
         payable,

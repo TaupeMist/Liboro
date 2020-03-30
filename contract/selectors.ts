@@ -3,7 +3,8 @@ import {
   WalletType,
   LiboroWalletType,
   LiboroAssetType,
-  ComparisonType
+  ComparisonType,
+  PortfolioType
 } from './types'
 
 import {
@@ -15,17 +16,49 @@ export const getWallet = (state): WalletType => {
   return state.wallet
 }
 
-export const getPortfolio = (state): WalletType => {
+export const getPortfolio = (state): LiboroWalletType => {
   return state.table.portfolio
 }
 
-export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType => {
-  const portfolio = getPortfolio(state)
+export const getWalletRatioOfMarketCap = (state) => (wallet: LiboroWalletType) => {
+  console.log('getWalletRatioOfMarketCap', wallet)
+  const walletBaseTokenValue = wallet.assets[state.table.baseToken.id]
 
-  return {
+  return walletBaseTokenValue
+    ? walletBaseTokenValue / state.table.baseToken.marketCap
+    : 0
+}
+
+export const getReserve = (state) => (wallet: LiboroWalletType, assetId: AssetType): number => {
+  return format(wallet.ratioOfMarketCap * state.table.asset[assetId].marketCap)
+}
+
+export const getReserves = (state) => (wallet: LiboroWalletType): LiboroWalletType => {
+  const assetIds = Object.keys(wallet.portfolio)
+
+  const intoPortfolio = (acc: LiboroWalletType, assetId: string): LiboroWalletType => ({
+    ...acc,
+    [assetId]: {
+      ...getLiboroAsset(state)(assetId),
+      reserve: getReserve(state)(wallet, assetId)
+    }
+  })
+
+  return assetIds.reduce(intoPortfolio, {} as LiboroWalletType)
+}
+
+export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType => {
+  const portfolio = getPortfolio(state)[getWalletId(wallet)] || {}
+
+  const liboroWallet: LiboroWalletType = {
     ...wallet,
-    portfolio: portfolio[getWalletId(wallet)] || {}
+    portfolio
   }
+
+  liboroWallet.ratioOfMarketCap = getWalletRatioOfMarketCap(state)(liboroWallet)
+  liboroWallet.reserves = getReserves(state)(liboroWallet)
+
+  return liboroWallet
 }
 
 /**
@@ -43,7 +76,7 @@ export const getAssetTotal = (
   return baseAsset.value + assetValue + (targetAsset ? targetAsset.value : 0)
 }
 
-export const getPercentageOfMarketCap = (asset: LiboroAssetType, targetAsset: LiboroAssetType) => {
+export const getAssetPercentageOfMarketCap = (asset: LiboroAssetType, targetAsset: LiboroAssetType) => {
   const value = format(targetAsset.value / asset.marketCap)
 
   if (value > 1 || value < 0)
@@ -55,7 +88,7 @@ export const getPercentageOfMarketCap = (asset: LiboroAssetType, targetAsset: Li
 export const getComparison = (state) => (asset: LiboroAssetType, targetAsset: LiboroAssetType): ComparisonType => {
   const comparison: ComparisonType = {
     total: getAssetTotal(state.table.baseAsset, state.assets[asset.id], targetAsset),
-    percentageOfMarketCap: getPercentageOfMarketCap(asset, targetAsset)
+    percentageOfMarketCap: getAssetPercentageOfMarketCap(asset, targetAsset)
   }
 
   return comparison

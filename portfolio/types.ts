@@ -22,10 +22,6 @@ export type WalletType = {
   }
 }
 
-export type LiboroWalletType = WalletType & {
-  portfolio: PortfolioType
-}
-
 export type ContractType = {
   id: string,
   assets: {

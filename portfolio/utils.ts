@@ -1,5 +1,4 @@
 import {
-  LiboroWalletType,
   GetPorfolioType,
   AssetType,
   WalletType,
@@ -10,7 +9,7 @@ import {
 
 import {
   format,
-  asDecimal
+  LiboroWalletType
 } from '../contract'
 
 export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: AssetType[] = []): number => {

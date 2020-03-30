@@ -24,7 +24,9 @@ export type WalletType = {
 }
 
 export type LiboroWalletType = WalletType & {
-  portfolio: PortfolioType
+  portfolio: PortfolioType,
+  reserves?: any,
+  ratioOfMarketCap?: number
 }
 
 export type ContractType = {
