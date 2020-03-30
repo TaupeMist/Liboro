@@ -35,13 +35,13 @@ export class PortfolioContract extends Contract {
   public constructor(readonly id: string) { super(id) }
 
   mint = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const liboroAsset = {
+    const deposit = {
       ...this.getAsset(asset),
       value: amount
     }
 
     const payable = calcMintPayable(
-      liboroAsset,
+      deposit,
       this.baseAsset,
       this.baseToken
     )(this)
@@ -77,7 +77,7 @@ export class PortfolioContract extends Contract {
 
     this.rebalance(increasePortfolioAsset, wallet)
 
-    this.chain.execute(mint(liboroAsset, wallet, this.id, payable))    
+    this.chain.execute(mint(deposit, wallet, this.id, payable))    
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
@@ -92,17 +92,16 @@ export class PortfolioContract extends Contract {
   }
 
   burn = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
-    const liboroAsset = {
+    const withdrawal = {
       ...this.getAsset(asset),
       value: amount
     }
 
     const payable = calcBurnPayable(
-      liboroAsset,
-      this.assets[liboroAsset.id],
-      this.baseAsset,
+      withdrawal,
+      this.assets[withdrawal.id],
       this.baseToken
-    )(this)
+    )
 
     console.log('burnPayable', payable)
 
@@ -138,7 +137,7 @@ export class PortfolioContract extends Contract {
 
     this.rebalance(descreasePortfolioAsset, wallet)
 
-    this.chain.execute(burn(liboroAsset, wallet, this.id, payable))
+    this.chain.execute(burn(withdrawal, wallet, this.id, payable))
 
     // TODO: calc and set wallet portfolio
     this.table.portfolio.global = calcGlobalPortfolio(

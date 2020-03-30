@@ -10,22 +10,19 @@ import {
 
 import {
   format,
-  asDecimal,
-  Contract
+  asDecimal
 } from '../contract'
 
 export const calcBurnPayable = (
   withdrawal: LiboroAssetType,
   contractAsset: number,
-  baseAsset: LiboroAssetType,
   baseToken: LiboroAssetType
-) => (contract: Contract): LiboroAssetType => {
-  console.log('calcBurnPayable', withdrawal)
-  // TODO: Add logic to calculate the asset to be paid due to the burn
+): LiboroAssetType => {
+  const { percentageOfMarketCap } = baseToken.compare(withdrawal)
 
   return {
     ...withdrawal,
-    value: 50
+    value: format(percentageOfMarketCap * contractAsset)
   } 
 }
 
@@ -36,14 +33,8 @@ export const rebalanceBurn = (
   payable: LiboroAssetType,
   baseToken: LiboroAssetType
 ): PortfolioType => {
-  console.log('Liboro Asset', asset)
-  console.log('Liboro Wallet', wallet)
-  console.log('Base Token', baseToken)
-
-  const ratio = format(payable.value / baseToken.marketCap)
-
-  if (ratio > 1 || ratio < 0)
-    throw new Error(`Ratio must equal between 0 and 1. Ratio: ${ratio}`)
+  console.log('rebalanceBurn', portfolio, asset, wallet, payable, baseToken)
+  const ratio = asset.compare(payable).percentageOfMarketCap
 
   console.log('ratio', ratio)
 

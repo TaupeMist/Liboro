@@ -5,7 +5,8 @@ export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
 export type AssetType = AssetHardType | string
 
 export type ComparisonType = {
-  total: number
+  total: number,
+  percentageOfMarketCap?: number
 }
 
 export type LiboroAssetType = {

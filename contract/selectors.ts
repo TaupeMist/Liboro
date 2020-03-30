@@ -7,7 +7,8 @@ import {
 } from './types'
 
 import {
-  getWalletId
+  getWalletId,
+  format
 } from './utils'
 
 export const getWallet = (state): WalletType => {
@@ -42,27 +43,43 @@ export const getAssetTotal = (
   return baseAsset.value + assetValue + (targetAsset ? targetAsset.value : 0)
 }
 
+export const getPercentageOfMarketCap = (asset: LiboroAssetType, targetAsset: LiboroAssetType) => {
+  const value = format(targetAsset.value / asset.marketCap)
+
+  if (value > 1 || value < 0)
+      throw new Error(`Percentage: ${value} must equal between 0 and 1.`)
+
+  return value
+}
+
+export const getComparison = (state) => (asset: LiboroAssetType, targetAsset: LiboroAssetType): ComparisonType => {
+  const comparison: ComparisonType = {
+    total: getAssetTotal(state.table.baseAsset, state.assets[asset.id], targetAsset),
+    percentageOfMarketCap: getPercentageOfMarketCap(asset, targetAsset)
+  }
+
+  return comparison
+}
+
 export const getLiboroAsset = (state) => (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
   console.log('state.table.portfolio', state.table.portfolio, asset)
 
-  const nextAsset = prevAsset
-    ? {
-      ...state.table.asset[asset],
-      ...prevAsset,
-    }
-    : {
-      ...state.table.asset[asset],
-      id: asset,
-      value: state.assets[asset],
-    }
+  const predefinedAsset = {
+    ...state.table.asset[asset],
+    ...prevAsset
+  } 
 
-  console.log('state.baseAsset', state)
-
-  nextAsset.compare = (targetAsset: LiboroAssetType): ComparisonType => {
-    return {
-      total: getAssetTotal(state.table.baseAsset, state.assets[asset], targetAsset)
-    }
+  const newAsset = {
+    ...state.table.asset[asset],
+    id: asset,
+    value: state.assets[asset],
   }
+
+  const nextAsset = prevAsset
+    ? predefinedAsset
+    : newAsset
+
+  nextAsset.compare = (targetAsset: LiboroAssetType) => getComparison(state)(nextAsset, targetAsset)
 
   return nextAsset
 }
