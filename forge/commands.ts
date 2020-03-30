@@ -6,16 +6,16 @@ import {
 } from '../chain'
 
 import {
-  LiboroAssetType,
+  AssetType,
   format,
   getTable
 } from '../contract'
 
 export const mint = (
-  assetSelling: LiboroAssetType,
+  assetSelling: AssetType,
   buyer: WalletType,
   contractId: string,
-  payable: LiboroAssetType
+  payable: AssetType
 ): CommandType => {
   const execute: ExecuteType = state => {
     const { contract, wallet } = state
@@ -51,10 +51,10 @@ export const mint = (
 }
 
 export const burn = (
-  assetBuying: LiboroAssetType,
+  assetBuying: AssetType,
   buyer: WalletType,
   contractId: string,
-  payable: LiboroAssetType
+  payable: AssetType
 ): CommandType => {
   const execute: ExecuteType = state => {
     const { contract, wallet } = state

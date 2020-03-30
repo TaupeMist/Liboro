@@ -1,17 +1,17 @@
 import {
   addContract,
-  IContract,
   AssetHardType,
   StoreType,
-  AssetType,
-  WalletType,
-  ContractStateType
+  AssetType as ChainAssetType,
+  WalletType as ChainWalletType
 } from '../chain';
 
 import {
   TableType,
-  LiboroWalletType,
-  LiboroAssetType
+  WalletType,
+  AssetType,
+  IContract,
+  ContractStateType
 } from './types'
 
 import {
@@ -26,8 +26,8 @@ import {
 } from './utils'
 
 import {
-  getLiboroWallet,
-  getLiboroAsset
+  getWallet,
+  getAsset
 } from './selectors'
 
 export class Contract implements IContract {
@@ -63,7 +63,7 @@ export class Contract implements IContract {
     return this.getAsset(this.table.baseToken.id, this.table.baseToken)
   }
 
-  set baseToken(baseToken: LiboroAssetType) {
+  set baseToken(baseToken: AssetType) {
     this.table.baseToken = baseToken
   }
 
@@ -71,27 +71,19 @@ export class Contract implements IContract {
     return this.getAsset(this.table.baseAsset.id, this.table.baseAsset)
   }
 
-  getState = () => {
+  getState = (): ContractStateType => {
     return {
       assets: { ...this.assets },
       table: { ...this.table }
     }
   }
 
-  // TODO: return additonal account information (including its assets and price indexes) and create type
-  getWallet = (wallet: WalletType): LiboroWalletType => {
-    // TODO: return wallet portfolio cap
-    // TODO: return price index based wallet portfolio
-
-    return getLiboroWallet(this.getState())(wallet)
+  getWallet = (wallet: ChainWalletType): WalletType => {
+    return getWallet(this.getState())(wallet)
   }
 
-  // TODO: return additonal asset information and create type
-  getAsset = (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
-    // TODO: return global market cap
-    // TODO: return price index based global portfolio
-
-    return getLiboroAsset(this.getState())(asset, prevAsset)
+  getAsset = (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
+    return getAsset(this.getState())(asset, prevAsset)
   }
 
   deploy = (chain: StoreType): this => {
@@ -114,7 +106,7 @@ export class Contract implements IContract {
     return this
   }
 
-  configure = (asset: AssetHardType, token: AssetType, baseAsset = 10000, wallet?: WalletType): this => {
+  configure = (asset: AssetHardType, token: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this => {
     if (!this.chain) throw new Error('Chain does not exist. Chain must first be deployed.')
 
     this.addAsset(asset)
@@ -147,7 +139,7 @@ export class Contract implements IContract {
     return this
   }
 
-  addAsset = (asset: AssetType, wallet?: WalletType): this => {
+  addAsset = (asset: ChainAssetType, wallet?: ChainWalletType): this => {
     this.chain.execute(addAsset(asset, this))
 
     this.updateTable({
@@ -162,13 +154,13 @@ export class Contract implements IContract {
     return this.addAsset(token)
   }
 
-  transfer = (amount: number, asset: AssetType, sender: WalletType, receiver: WalletType) => {
+  transfer = (amount: number, asset: ChainAssetType, sender: ChainWalletType, receiver: ChainWalletType) => {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this
   }
 
-  seed = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
+  seed = (amount: number, asset: AssetHardType, wallet: ChainWalletType): this => {
     this.addAsset(asset, wallet)
 
     this.chain.execute(seed(amount, asset, wallet, this.id))
@@ -178,8 +170,8 @@ export class Contract implements IContract {
 
   // TODO: rename and clarify usage
   protected updateTable = (config: {
-    wallet?: WalletType,
-    asset?: AssetType
+    wallet?: ChainWalletType,
+    asset?: ChainAssetType
   }) => {
     const { wallet, asset } = config
 

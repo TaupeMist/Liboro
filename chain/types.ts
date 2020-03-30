@@ -37,13 +37,6 @@ export type TableType = {
 
 export type GetPorfolioType = (portfolio: PortfolioType) => PortfolioType
 
-export type ContractStateType = {
-  assets: {
-    [A in AssetType]?: number
-  },
-  table: TableType
-}
-
 export type StateType = {
   contract: {
     [K: string]: Contract
@@ -86,18 +79,9 @@ export type StoreType = {
   debug: (command?: CommandType) => {}
 }
 
-export interface IContract {
-  assets: ContractStateType['assets'],
-  table: ContractStateType['table']
-}
-
-export type TransactionStateType = {
-  wallet: WalletType,
-  contract: IContract
-}
-
-export type TransactionType = {
-  curr: TransactionStateType,
-  next: TransactionStateType,
-  meta: {}
+export type ContractStateType = {
+  assets: {
+    [A in AssetType]?: number
+  },
+  table: TableType
 }

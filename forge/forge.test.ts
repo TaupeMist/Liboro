@@ -11,7 +11,7 @@ import {
   ForgeContract
 } from './forge'
 
-describe('Portfolio', () => {
+describe('Forge', () => {
   it('can rebalance and calculate global portfolio', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -93,8 +93,7 @@ describe('Portfolio', () => {
     const taupemist: WalletType = {
       id: 'taupemist',
       assets: {
-        usd: 1000,
-        eos: 1000
+        usd: 1000
       }
     }
 
@@ -110,8 +109,6 @@ describe('Portfolio', () => {
       }), taupemist)
       .mint(100, 'usd', taupemist)
 
-    console.log('end')
-
     const { liboro } = chain.getState().contract
     
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
@@ -121,7 +118,6 @@ describe('Portfolio', () => {
   })
 
   it('can rebalance when burning', () => {
-    console.log('can rebalance when burning')
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
     const taupemist: WalletType = {
@@ -143,12 +139,8 @@ describe('Portfolio', () => {
       }), taupemist)
       .burn(45.45, 'usd', taupemist)
 
-    console.log('end')
-
     const { liboro } = chain.getState().contract
     const { wallet } = chain.getState()
-
-    console.log('can rebalance when burning', wallet, liboro.assets, liboro.table)
 
     expect(liboro.table.asset.usd.marketCap).to.equal(75)
     expect(liboro.table.baseToken.marketCap).to.equal(45.45)

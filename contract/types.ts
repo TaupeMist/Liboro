@@ -5,26 +5,26 @@ export type ComparisonType = {
   percentageOfMarketCap?: number
 }
 
-export type LiboroAssetType = {
+export type AssetType = {
   id: chain.AssetType,
   value: number,
   marketCap: number,
-  compare?: (targetAsset: LiboroAssetType) => ComparisonType
+  compare?: (targetAsset: AssetType) => ComparisonType
 }
 
-export type LiboroWalletReserveType = LiboroAssetType & {
+export type WalletReserveType = AssetType & {
   ratio: number,
   reserve: number,
   baseTokenValue: number
 }
 
-export type LiboroWalletPortfolioType = {
-  [A in chain.AssetType]?: LiboroWalletReserveType
+export type WalletPortfolioType = {
+  [A in chain.AssetType]?: WalletReserveType
 }
 
-export type LiboroWalletType = chain.WalletType & {
+export type WalletType = chain.WalletType & {
   portfolio: PortfolioType,
-  reserves?: LiboroWalletPortfolioType,
+  reserves?: WalletPortfolioType,
   ratioOfMarketCap?: number,
   canBurn?: (amount: number, assetId: chain.AssetHardType) => boolean,
   baseTokenValue?: number
@@ -42,10 +42,10 @@ export type TableType = {
     [K: string]: PortfolioType
   },
   asset?: {
-    [A in chain.AssetType]: LiboroAssetType
+    [A in chain.AssetType]: AssetType
   },
-  baseAsset: LiboroAssetType,
-  baseToken: LiboroAssetType
+  baseAsset: AssetType,
+  baseToken: AssetType
 }
 
 export type ContractStateType = {
@@ -53,4 +53,9 @@ export type ContractStateType = {
     [A in chain.AssetType]?: number
   },
   table: TableType
+}
+
+export interface IContract {
+  assets: ContractStateType['assets'],
+  table: ContractStateType['table']
 }

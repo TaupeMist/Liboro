@@ -1,19 +1,19 @@
 import {
   GetPorfolioType,
-  AssetType,
-  WalletType,
+  AssetType as ChainAssetType,
+  WalletType as ChainWalletType,
 } from '../chain'
 
 import {
   format,
-  LiboroWalletType,
-  LiboroAssetType,
+  WalletType,
+  AssetType,
   PortfolioType,
   TableType
 } from '../contract'
 
-export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: AssetType[] = []): number => {
-  const excludeAssets = (asset: AssetType): boolean => excludedAssets.indexOf(asset) === -1
+export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: ChainAssetType[] = []): number => {
+  const excludeAssets = (asset: ChainAssetType): boolean => excludedAssets.indexOf(asset) === -1
 
   const assetIds = Object
     .keys(portfolio)
@@ -28,7 +28,7 @@ export const isPortfolioValid = (portfolio: PortfolioType): boolean => {
   return getPortfolioTotal(portfolio) === 100
 }
 
-export const calcPortfolio = (getPortfolio: GetPorfolioType, wallet: LiboroWalletType): PortfolioType => {
+export const calcPortfolio = (getPortfolio: GetPorfolioType, wallet: WalletType): PortfolioType => {
   const nextPortfolio = getPortfolio(wallet.portfolio)
 
   if (!isPortfolioValid(nextPortfolio))
@@ -69,7 +69,7 @@ export const balance = (portfolio: PortfolioType): PortfolioType => {
   return assetIds.reduce(intoPortfolio, {} as PortfolioType)
 }
 
-export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: AssetType) => {
+export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAssetType) => {
   const minusAsset = (id: string): boolean => id !== asset
 
   const assetIds = Object
@@ -98,8 +98,8 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: AssetTyp
 }
 
 export const calcRebalanceWeight = (
-  wallet: WalletType,
-  baseToken: LiboroAssetType,
+  wallet: ChainWalletType,
+  baseToken: AssetType,
   portfolio: TableType['portfolio']
 ): number => {
   if (baseToken.marketCap === 0 || Object.keys(portfolio).length === 1) return 1
@@ -108,8 +108,8 @@ export const calcRebalanceWeight = (
 }
 
 export const calcGlobalPortfolio = (
-  wallet: LiboroWalletType,
-  baseToken: LiboroAssetType,
+  wallet: WalletType,
+  baseToken: AssetType,
   portfolio: TableType['portfolio'],
   getPortfolio?: GetPorfolioType
 ): PortfolioType => {

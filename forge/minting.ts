@@ -7,8 +7,8 @@ import {
   format,
   getValue,
   asDecimal,
-  LiboroWalletType,
-  LiboroAssetType,
+  WalletType,
+  AssetType,
   PortfolioType
 } from '../contract'
 
@@ -20,7 +20,7 @@ import {
  * @param contract 
  */
 export const getDepositRatio = (
-  deposit: LiboroAssetType,
+  deposit: AssetType,
   total: number,
   contract: Contract
 ) => {
@@ -37,10 +37,10 @@ export const getDepositRatio = (
  */
 
 export const calcMintPayable = (
-  deposit: LiboroAssetType,
-  baseAsset: LiboroAssetType,
-  baseToken: LiboroAssetType
-) => (contract: Contract): LiboroAssetType => {
+  deposit: AssetType,
+  baseAsset: AssetType,
+  baseToken: AssetType
+) => (contract: Contract): AssetType => {
   // console.log('calcMintPayable', deposit, contractAsset, baseAsset, baseToken)
 
   const contractAssetTotal = baseAsset.compare(deposit).total
@@ -64,10 +64,10 @@ export const calcMintPayable = (
  * @param baseToken 
  */
 export const rebalanceMint = (
-  minting: LiboroAssetType,
-  wallet: LiboroWalletType,
-  payable: LiboroAssetType,
-  baseToken: LiboroAssetType
+  minting: AssetType,
+  wallet: WalletType,
+  payable: AssetType,
+  baseToken: AssetType
 ): PortfolioType => {
   const ratio = format(payable.value / (payable.value + wallet.assets[baseToken.id]))
 

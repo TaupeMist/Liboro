@@ -1,8 +1,10 @@
 import {
-  LiboroWalletType,
-  LiboroAssetType,
+  WalletType,
+  AssetType,
   ComparisonType,
-  LiboroWalletPortfolioType
+  WalletPortfolioType,
+  ContractStateType,
+  TableType
 } from './types'
 
 import {
@@ -11,20 +13,46 @@ import {
 } from './utils'
 
 import {
-  AssetType,
-  WalletType,
+  AssetType as ChainAssetType,
+  WalletType as ChainWalletType,
   AssetHardType
 } from '../chain'
 
-export const getWallet = (state): WalletType => {
-  return state.wallet
-}
-
-export const getPortfolio = (state): LiboroWalletType => {
+export const getPortfolio = (state: ContractStateType): TableType['portfolio'] => {
   return state.table.portfolio
 }
 
-export const getWalletRatioOfMarketCap = (state) => (wallet: LiboroWalletType) => {
+export const getComparison = (state: ContractStateType) => (asset: AssetType, targetAsset: AssetType): ComparisonType => {
+  const comparison: ComparisonType = {
+    total: getAssetTotal(state.table.baseAsset, state.assets[asset.id], targetAsset),
+    percentageOfMarketCap: getAssetPercentageOfMarketCap(asset, targetAsset)
+  }
+
+  return comparison
+}
+
+export const getAsset = (state: ContractStateType) => (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
+  const predefinedAsset = {
+    ...state.table.asset[asset],
+    ...prevAsset
+  } 
+
+  const newAsset = {
+    ...state.table.asset[asset],
+    id: asset,
+    value: state.assets[asset],
+  }
+
+  const nextAsset = prevAsset
+    ? predefinedAsset
+    : newAsset
+
+  nextAsset.compare = (targetAsset: AssetType) => getComparison(state)(nextAsset, targetAsset)
+
+  return nextAsset
+}
+
+export const getWalletRatioOfMarketCap = (state: ContractStateType) => (wallet: WalletType) => {
   const walletBaseTokenValue = wallet.assets[state.table.baseToken.id]
 
   return walletBaseTokenValue
@@ -32,19 +60,19 @@ export const getWalletRatioOfMarketCap = (state) => (wallet: LiboroWalletType) =
     : 0
 }
 
-export const getPortfolioRatio = (wallet: LiboroWalletType, assetId: AssetType) => {
+export const getPortfolioRatio = (wallet: WalletType, assetId: ChainAssetType) => {
   return wallet.portfolio[assetId] / 100
 }
 
-export const getReserve = (state) => (wallet: LiboroWalletType, assetId: AssetType): number => {
+export const getReserve = (state: ContractStateType) => (wallet: WalletType, assetId: ChainAssetType): number => {
   return format(wallet.ratioOfMarketCap * state.table.asset[assetId].marketCap * getPortfolioRatio(wallet, assetId))
 }
 
-export const getReserves = (state) => (wallet: LiboroWalletType): LiboroWalletPortfolioType => {
+export const getReserves = (state: ContractStateType) => (wallet: WalletType): WalletPortfolioType => {
   const assetIds = Object.keys(wallet.portfolio)
 
-  const intoPortfolio = (acc: LiboroWalletPortfolioType, assetId: string): LiboroWalletPortfolioType => {
-    const liboroAsset = getLiboroAsset(state)(assetId)
+  const intoPortfolio = (acc: WalletPortfolioType, assetId: ChainAssetType): WalletPortfolioType => {
+    const liboroAsset = getAsset(state)(assetId)
     const value = wallet.portfolio[assetId]
     const marketCap = assetId === state.table.baseToken.id
       ? state.table.baseToken.marketCap
@@ -69,14 +97,14 @@ export const getReserves = (state) => (wallet: LiboroWalletType): LiboroWalletPo
   return assetIds.reduce(intoPortfolio, {})
 }
 
-export const getCanBurn = (wallet: LiboroWalletType) => (amount: number, assetId: AssetHardType): boolean => {
+export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: AssetHardType): boolean => {
   return wallet.reserves[assetId].baseTokenValue >= amount
 } 
 
-export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType => {
+export const getWallet = (state: ContractStateType) => (wallet: ChainWalletType): WalletType => {
   const portfolio = getPortfolio(state)[getWalletId(wallet)] || {}
 
-  const liboroWallet: LiboroWalletType = {
+  const liboroWallet: WalletType = {
     ...wallet,
     portfolio
   }
@@ -96,53 +124,18 @@ export const getLiboroWallet = (state) => (wallet: WalletType): LiboroWalletType
  * @param targetAsset the target amount to be added to the contract's balance of the asset
  */
 export const getAssetTotal = (
-  baseAsset: LiboroAssetType,
+  baseAsset: AssetType,
   assetValue: number,
-  targetAsset?: LiboroAssetType
+  targetAsset?: AssetType
 ) => {
   return baseAsset.value + assetValue + (targetAsset ? targetAsset.value : 0)
 }
 
-export const getAssetPercentageOfMarketCap = (asset: LiboroAssetType, targetAsset: LiboroAssetType) => {
+export const getAssetPercentageOfMarketCap = (asset: AssetType, targetAsset: AssetType) => {
   const value = format(targetAsset.value / asset.marketCap)
 
   if (value > 1 || value < 0)
       throw new Error(`Percentage: ${value} must equal between 0 and 1.`)
 
   return value
-}
-
-export const getComparison = (state) => (asset: LiboroAssetType, targetAsset: LiboroAssetType): ComparisonType => {
-  const comparison: ComparisonType = {
-    total: getAssetTotal(state.table.baseAsset, state.assets[asset.id], targetAsset),
-    percentageOfMarketCap: getAssetPercentageOfMarketCap(asset, targetAsset)
-  }
-
-  return comparison
-}
-
-export const getLiboroAsset = (state) => (asset: AssetType, prevAsset?: LiboroAssetType): LiboroAssetType => {
-  const predefinedAsset = {
-    ...state.table.asset[asset],
-    ...prevAsset
-  } 
-
-  const newAsset = {
-    ...state.table.asset[asset],
-    id: asset,
-    value: state.assets[asset],
-  }
-
-  const nextAsset = prevAsset
-    ? predefinedAsset
-    : newAsset
-
-  nextAsset.compare = (targetAsset: LiboroAssetType) => getComparison(state)(nextAsset, targetAsset)
-
-  return nextAsset
-}
-  
-
-export const getBaseTokenMarketCap = (state): number => {
-  return getLiboroAsset(state)(state.baseToken).marketCap
 }
