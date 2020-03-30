@@ -1,6 +1,6 @@
 import {
   getPortfolioMinusAsset
-} from './utils'
+} from '../portfolio'
 
 import {
   Contract,

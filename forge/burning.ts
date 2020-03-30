@@ -4,7 +4,7 @@ import {
 
 import {
   getPortfolioMinusAsset
-} from './utils'
+} from '../portfolio'
 
 import {
   format,

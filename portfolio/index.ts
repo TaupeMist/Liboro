@@ -1,5 +1,3 @@
-export { default as Portfolio } from './portfolio'
-
-export * from './commands'
+export { default as PortfolioContract } from './portfolio'
 
 export * from './utils'
