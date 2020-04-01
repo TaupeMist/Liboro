@@ -18,8 +18,4 @@ export const hasFunds = (amount: number, assetBuying: AssetType, assetSelling: A
   return amount <= wallet.assets[assetSelling] && amount <= contract.assets[assetBuying]
 }
 
-export const getValue = (asset: AssetType) => (contract: Contract): number => {
-  return format(contract.table.portfolio.global[asset] / 100)
-}
-
 export const getWalletId = (wallet: WalletType): string => wallet.id.toLowerCase()

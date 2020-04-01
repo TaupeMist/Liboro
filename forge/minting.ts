@@ -3,9 +3,7 @@ import {
 } from '../portfolio'
 
 import {
-  Contract,
   format,
-  getValue,
   asDecimal,
   WalletType,
   AssetType,
@@ -16,15 +14,17 @@ import {
  * Get the decimal ratio increase of the deposit towards the contract's asset balance
  * 
  * @param deposit the deposit amount to be added to the contract's balance
- * @param total 
- * @param contract 
+ * @param total the new total of minting token
+ * @param globalPortfolio the global portfolio of this contract
  */
 export const getDepositRatio = (
   deposit: AssetType,
   total: number,
-  contract: Contract
+  globalPortfolio: PortfolioType
 ) => {
-  return format(deposit.value / total * getValue(deposit.id)(contract))
+  const ratio = format(globalPortfolio[deposit.id] / 100)
+
+  return format(deposit.value / total * ratio)
 }
 
 /**
@@ -34,16 +34,18 @@ export const getDepositRatio = (
  * @param contractAsset the contract's balance of the asset being minted
  * @param baseAsset the base supply of the base token
  * @param baseToken the primary token of this contract
+ * @param globalPortfolio the global portfolio of this contract
  */
 
 export const calcMintPayable = (
   deposit: AssetType,
   baseAsset: AssetType,
-  baseToken: AssetType
-) => (contract: Contract): AssetType => {
+  baseToken: AssetType,
+  globalPortfolio: PortfolioType
+): AssetType => {
   const contractAssetTotal = baseAsset.compare(deposit).total
 
-  const depositRatio = getDepositRatio(deposit, contractAssetTotal, contract)
+  const depositRatio = getDepositRatio(deposit, contractAssetTotal, globalPortfolio)
 
   return {
     ...deposit,

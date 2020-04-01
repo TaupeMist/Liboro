@@ -40,8 +40,9 @@ export class ForgeContract extends PortfolioContract {
     const payable = calcMintPayable(
       deposit,
       this.baseAsset,
-      this.baseToken
-    )(this)
+      this.baseToken,
+      this.table.portfolio.global
+    )
 
     const increasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
       if (!wallet.assets[this.baseToken.id] || wallet.assets[this.baseToken.id] === undefined)

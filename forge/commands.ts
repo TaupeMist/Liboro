@@ -21,6 +21,7 @@ export const mint = (
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
   
+    // TODO: replace with better system
     // if (!hasFunds(assetSelling.value, baseToken, assetSelling.id, wallet[buyer.id])(getContract(state, contractId))) return state
 
     const { assets } = wallet[buyer.id]
@@ -60,6 +61,7 @@ export const burn = (
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
+    // TODO: replace with better system
     // if (!hasFunds(assetBuying.value, baseToken, assetBuying.id, wallet[buyer.id])(getContract(state, contractId))) return state
 
     const { assets } = wallet[buyer.id]
