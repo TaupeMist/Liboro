@@ -1,4 +1,8 @@
 import {
+  Contract
+} from './contract'
+
+import {
   WalletType,
   AssetType,
   ComparisonType,
@@ -15,8 +19,13 @@ import {
 import {
   AssetType as ChainAssetType,
   WalletType as ChainWalletType,
-  AssetHardType
+  AssetHardType,
+  StateType
 } from '../chain'
+
+export const getContract = (state: StateType, id: string): Contract => state.contract[id]
+
+export const getTable = (state: StateType, id: string): ContractStateType['table'] => getContract(state, id).table
 
 export const getPortfolio = (state: ContractStateType): TableType['portfolio'] => {
   return state.table.portfolio
@@ -35,7 +44,7 @@ export const getAsset = (state: ContractStateType) => (asset: ChainAssetType, pr
   const predefinedAsset = {
     ...state.table.asset[asset],
     ...prevAsset
-  } 
+  }
 
   const newAsset = {
     ...state.table.asset[asset],
@@ -99,7 +108,7 @@ export const getReserves = (state: ContractStateType) => (wallet: WalletType): W
 
 export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: AssetHardType): boolean => {
   return wallet.reserves[assetId].baseTokenValue >= amount
-} 
+}
 
 export const getWallet = (state: ContractStateType) => (wallet: ChainWalletType): WalletType => {
   const portfolio = getPortfolio(state)[getWalletId(wallet)] || {}
@@ -118,7 +127,7 @@ export const getWallet = (state: ContractStateType) => (wallet: ChainWalletType)
 
 /**
  * Get the next total of a contract's asset
- * 
+ *
  * @param baseAsset any virtual or pre-defined supply of the asset
  * @param assetValue the contract's balance of the asset
  * @param targetAsset the target amount to be added to the contract's balance of the asset

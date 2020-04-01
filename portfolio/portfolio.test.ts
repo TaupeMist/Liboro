@@ -26,7 +26,7 @@ describe('Portfolio', () => {
       .deploy(chain)
       .configure('usd', 'liborodollar', 1000, wallet)
       .rebalance(flatten, wallet)
-    
+
     const { liboro } = chain.getState().contract
 
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
@@ -38,5 +38,36 @@ describe('Portfolio', () => {
       usd: 50,
       liborodollar: 50
     })
+  })
+
+  it('can seed', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const wallet: WalletType = {
+      id: 'taupemist',
+      assets: {
+        eos: 100
+      }
+    }
+
+    chain.execute(addWallet(wallet))
+
+    new PortfolioContract('liboro')
+      .deploy(chain)
+      .configure('usd', 'liborodollar', 1000)
+      .seed(100, 'eos', wallet)
+
+    const { liboro } = chain.getState().contract
+
+    expect(liboro.assets.eos).to.equal(100)
+
+    expect(liboro.table.portfolio.taupemist).to.exist
+    expect(liboro.table.portfolio.taupemist.usd).to.equal(100)
+    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(0)
+    expect(liboro.table.portfolio.taupemist.eos).to.equal(0)
+
+    expect(liboro.table.portfolio.global).to.exist
+    expect(liboro.table.portfolio.global.usd).to.equal(100)
+    expect(liboro.table.portfolio.global.eos).to.equal(0)
   })
 })

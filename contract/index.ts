@@ -5,3 +5,5 @@ export * from './types'
 export * from './commands'
 
 export * from './utils'
+
+export * from './selectors'

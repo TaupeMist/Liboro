@@ -11,25 +11,24 @@ import {
 } from './contract'
 
 import {
+  getTable
+} from './selectors'
+
+import {
   CommandType,
   AssetHardType,
   ExecuteType,
   UndoType,
   AssetType,
-  WalletType,
-  StateType
+  WalletType
 } from '../chain'
-
-export const getContract = (state: StateType, id: string): Contract => state.contract[id]
-
-export const getTable = (state: StateType, id: string): ContractStateType['table'] => getContract(state, id).table
 
 export const addAsset = (asset: AssetType, target: Contract): CommandType => {
   const execute: ExecuteType = state => {
     const { contract } = state;
 
     contract[target.id].assets[asset.toLowerCase()] = 0
-      
+
     return { ...state, contract }
   }
 
@@ -40,7 +39,7 @@ export const addAsset = (asset: AssetType, target: Contract): CommandType => {
 
     return { ...state, contract }
   }
-  
+
   return {
     execute,
     undo
@@ -60,7 +59,7 @@ export const seed = (
     wallet[buyer.id].assets[assetSeeding] = format(assets[assetSeeding] - amount)
 
     contract[contractId].assets[assetSeeding] = amount
-      
+
     return { ...state, contract }
   }
 
@@ -73,7 +72,7 @@ export const seed = (
 
     return { ...state, contract }
   }
-  
+
   return {
     execute,
     undo
@@ -95,7 +94,7 @@ export const transfer = (
     wallet[sender.id].assets[asset] = format(wallet[sender.id].assets[asset] - amount)
 
     wallet[receiver.id].assets[asset] = format((wallet[receiver.id].assets[asset] || 0) + amount)
-      
+
     return { ...state, wallet }
   }
 
@@ -105,10 +104,10 @@ export const transfer = (
     wallet[sender.id].assets[asset] = format(wallet[sender.id].assets[asset] + amount)
 
     wallet[receiver.id].assets[asset] = format(wallet[receiver.id].assets[asset] - amount)
-      
+
     return { ...state, wallet }
   }
-  
+
   return {
     execute,
     undo
@@ -126,7 +125,7 @@ export const setTable = (
 
     prev = { ...contract[target.id].table }
     contract[target.id].table = table
-      
+
     return { ...state, contract }
   }
 
@@ -137,7 +136,7 @@ export const setTable = (
 
     return { ...state, contract }
   }
-  
+
   return {
     execute,
     undo

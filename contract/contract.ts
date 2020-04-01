@@ -17,7 +17,6 @@ import {
 import {
   addAsset,
   setTable,
-  seed,
   transfer
 } from './commands'
 
@@ -97,7 +96,7 @@ export class Contract implements IContract {
       this.table.portfolio = {
         global: {}
       }
-  
+
       this.table.asset = {}
     } catch (ex) {
       throw new Error('Could not deploy contract.')
@@ -106,7 +105,7 @@ export class Contract implements IContract {
     return this
   }
 
-  configure = (asset: AssetHardType, token: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this => {
+  configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000): this {
     if (!this.chain) throw new Error('Chain does not exist. Chain must first be deployed.')
 
     this.addAsset(asset)
@@ -123,18 +122,6 @@ export class Contract implements IContract {
       value: 0,
       marketCap: 0
     })
-
-    const initialPortfolio = {
-      [this.table.baseToken.id]: 0,
-      [this.table.baseAsset.id]: 100
-    }
-
-    this.table.portfolio = {
-      global: { ...initialPortfolio }
-    }
-
-    if (wallet)
-      this.table.portfolio[getWalletId(wallet)] = { ...initialPortfolio }
 
     return this
   }
@@ -156,14 +143,6 @@ export class Contract implements IContract {
 
   transfer = (amount: number, asset: ChainAssetType, sender: ChainWalletType, receiver: ChainWalletType) => {
     this.chain.execute(transfer(amount, asset, sender, receiver))
-
-    return this
-  }
-
-  seed = (amount: number, asset: AssetHardType, wallet: ChainWalletType): this => {
-    this.addAsset(asset, wallet)
-
-    this.chain.execute(seed(amount, asset, wallet, this.id))
 
     return this
   }
