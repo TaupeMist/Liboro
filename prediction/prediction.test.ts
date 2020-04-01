@@ -1,3 +1,5 @@
-describe('PredictionContract', () => {
-  it('can make prediction', () => {})
+context('Prediction', () => {
+  describe('PredictionContract', () => {
+    it('can make prediction', () => {})
+  })
 })
