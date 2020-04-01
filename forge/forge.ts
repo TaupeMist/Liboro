@@ -31,7 +31,7 @@ import {
 export class ForgeContract extends PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
-  mint = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
+  public mint(amount: number, asset: AssetHardType, wallet: WalletType): this {
     const deposit = {
       ...this.getAsset(asset),
       value: amount
@@ -69,7 +69,7 @@ export class ForgeContract extends PortfolioContract {
 
     this.rebalance(increasePortfolioAsset, wallet)
 
-    this.chain.execute(mint(deposit, wallet, this.id, payable))    
+    this.chain.execute(mint(deposit, wallet, this.id, payable))
 
     // TODO: move calc to utils
     this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
@@ -83,7 +83,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  burn = (amount: number, asset: AssetHardType, wallet: WalletType): this => {
+  public burn(amount: number, asset: AssetHardType, wallet: WalletType): this {
     const burner = this.getWallet(wallet)
 
     if (!burner.canBurn(amount, asset))

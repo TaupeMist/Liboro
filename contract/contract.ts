@@ -34,7 +34,7 @@ export class Contract implements IContract {
 
   public constructor(readonly id: string) {}
 
-  get assets(): ContractStateType['assets'] {
+  public get assets(): ContractStateType['assets'] {
     try {
       return this.chain.getState().contract[this.id].assets
     } catch (ex) {
@@ -42,7 +42,7 @@ export class Contract implements IContract {
     }
   }
 
-  get table(): TableType {
+  public get table(): TableType {
     try {
       return this.chain.getState().contract[this.id].table
     } catch (ex) {
@@ -50,7 +50,7 @@ export class Contract implements IContract {
     }
   }
 
-  set table(table: TableType) {
+  public set table(table: TableType) {
     try {
       this.chain.execute(setTable(table, this))
     } catch (ex) {
@@ -58,34 +58,34 @@ export class Contract implements IContract {
     }
   }
 
-  get baseToken() {
+  public get baseToken() {
     return this.getAsset(this.table.baseToken.id, this.table.baseToken)
   }
 
-  set baseToken(baseToken: AssetType) {
+  public set baseToken(baseToken: AssetType) {
     this.table.baseToken = baseToken
   }
 
-  get baseAsset() {
+  public get baseAsset() {
     return this.getAsset(this.table.baseAsset.id, this.table.baseAsset)
   }
 
-  getState = (): ContractStateType => {
+  public getState = (): ContractStateType => {
     return {
       assets: { ...this.assets },
       table: { ...this.table }
     }
   }
 
-  getWallet = (wallet: ChainWalletType): WalletType => {
+  public getWallet = (wallet: ChainWalletType): WalletType => {
     return getWallet(this.getState())(wallet)
   }
 
-  getAsset = (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
+  public getAsset = (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
     return getAsset(this.getState())(asset, prevAsset)
   }
 
-  deploy = (chain: StoreType): this => {
+  public deploy(chain: StoreType): this {
     if (this.chain) throw new Error('Chain already exists. Cannot override chain.')
 
     try {
@@ -93,11 +93,7 @@ export class Contract implements IContract {
 
       this.chain = chain
 
-      this.table.portfolio = {
-        global: {}
-      }
-
-      this.table.asset = {}
+      this.updateTable({})
     } catch (ex) {
       throw new Error('Could not deploy contract.')
     }
@@ -105,7 +101,7 @@ export class Contract implements IContract {
     return this
   }
 
-  configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000): this {
+  public configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000): this {
     if (!this.chain) throw new Error('Chain does not exist. Chain must first be deployed.')
 
     this.addAsset(asset)
@@ -126,7 +122,7 @@ export class Contract implements IContract {
     return this
   }
 
-  addAsset = (asset: ChainAssetType, wallet?: ChainWalletType): this => {
+  public addAsset(asset: ChainAssetType, wallet?: ChainWalletType): this {
     this.chain.execute(addAsset(asset, this))
 
     this.updateTable({
@@ -137,22 +133,25 @@ export class Contract implements IContract {
     return this
   }
 
-  addToken = (token: string): this => {
+  public addToken(token: string): this {
     return this.addAsset(token)
   }
 
-  transfer = (amount: number, asset: ChainAssetType, sender: ChainWalletType, receiver: ChainWalletType) => {
+  public transfer (amount: number, asset: ChainAssetType, sender: ChainWalletType, receiver: ChainWalletType) {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this
   }
 
   // TODO: rename and clarify usage
-  protected updateTable = (config: {
+  protected updateTable(config: {
     wallet?: ChainWalletType,
     asset?: ChainAssetType
-  }) => {
-    const { wallet, asset } = config
+  }) {
+    if (!this.table.asset)
+      this.table.asset = {}
+
+    const { asset } = config
 
     if (asset) {
       if (!this.table.asset[asset])
@@ -161,22 +160,6 @@ export class Contract implements IContract {
           value: 0,
           marketCap: 0
         }
-
-      if (!this.table.portfolio.global[asset])
-        this.table.portfolio.global[asset] = 0
-    }
-
-    if (wallet) {
-      // If wallet portfolio does not exist, set wallet portfolio asset to current global portfolio
-      const isNewWalletPortfolio = !this.table.portfolio[getWalletId(wallet)]
-      if (isNewWalletPortfolio) {
-        this.table.portfolio[getWalletId(wallet)] = { ...this.table.portfolio.global }
-      }
-
-      // If wallet portfolio's asset does not exist, set wallet portfolio's asset to 0
-      const isNewAsset = asset && !this.table.portfolio[getWalletId(wallet)][asset]
-      if (isNewAsset)
-        this.table.portfolio[getWalletId(wallet)][asset] = 0
     }
   }
 }
