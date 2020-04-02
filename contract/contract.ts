@@ -102,7 +102,6 @@ export class Contract implements IContract {
     const { asset, token, baseAsset } = config
 
     this.addAsset(asset)
-    this.addAsset(token)
 
     this.table.baseAsset = this.getAsset(asset, {
       id: asset,
@@ -110,11 +109,15 @@ export class Contract implements IContract {
       marketCap: baseAsset
     })
 
-    this.table.baseToken = this.getAsset(asset, {
-      id: token,
-      value: 0,
-      marketCap: 0
-    })
+    if (token) {
+      this.addAsset(token)
+
+      this.table.baseToken = this.getAsset(asset, {
+        id: token,
+        value: 0,
+        marketCap: 0
+      })
+    }
 
     return this
   }

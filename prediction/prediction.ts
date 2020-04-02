@@ -19,6 +19,13 @@ import {
 export class PredictionContract extends Contract {
   public constructor(readonly id: string) { super(id) }
 
+  public configure(): this {
+    this.addAsset('yes')
+    this.addAsset('no')
+
+    return this
+  }
+
   public createPrediction({
     value
   }: CreatePrediction): Prediction {
