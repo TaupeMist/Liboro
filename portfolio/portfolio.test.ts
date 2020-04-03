@@ -73,14 +73,14 @@ describe('Portfolio', () => {
 
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
       eos: 100,
-      liborodollar: 0,
-      usd: 0
+      usd: 0,
+      liborodollar: 0
     })
 
     expect(liboro.table.portfolio.global).to.deep.equal({
       eos: 100,
-      liborodollar: 0,
-      usd: 0
+      usd: 0,
+      liborodollar: 0
     })
   })
 })

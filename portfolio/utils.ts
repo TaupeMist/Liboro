@@ -28,14 +28,14 @@ export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: Chai
 }
 
 export const isPortfolioValid = (portfolio: PortfolioType): boolean => {
-  return getPortfolioTotal(portfolio) === 100
+  return getPortfolioTotal(portfolio) === 100 || getPortfolioTotal(portfolio) === 0
 }
 
 export const calcPortfolio = (getPortfolio: GetPorfolioType, wallet: WalletType): PortfolioType => {
   const nextPortfolio = getPortfolio(wallet.portfolio)
 
   if (!isPortfolioValid(nextPortfolio))
-    throw new Error(`Portfolio total/sum expected to equal 100. ${JSON.stringify(nextPortfolio)}`)
+    throw new Error(`Portfolio total/sum expected to equal 100 or 0. ${JSON.stringify(nextPortfolio)}`)
 
   return nextPortfolio
 }
@@ -82,9 +82,6 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAss
   })
 
   const portfolioToBalance = assetIds.reduce(intoPortfolio, {} as PortfolioType)
-
-  if (isPortfolioValid(portfolioToBalance))
-    throw new Error(`Portfolio is yet to be balanced/flattened therefor, should be invalid. ${JSON.stringify(portfolioToBalance)}`)
 
   const total = getPortfolioTotal(portfolioToBalance)
 

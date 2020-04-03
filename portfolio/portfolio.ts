@@ -13,14 +13,7 @@ import {
   seed
 } from './commands'
 
-import {
-  WalletType,
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType,
-  AssetHardType,
-  StoreType,
-  PortfolioType
-} from '../chain'
+import * as chain from '../chain'
 
 import {
   Contract,
@@ -30,7 +23,7 @@ import {
 export class PortfolioContract extends Contract {
   public constructor(readonly id: string) { super(id) }
 
-  public deploy(chain: StoreType): this {
+  public deploy(chain: chain.StoreType): this {
     try {
       super.deploy(chain)
 
@@ -42,13 +35,8 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public configure(config: ConfigureParams): this {
-    super.configure(config)
-
-    const { asset, wallet } = config
-
-    this.updateTable({ asset, wallet })
-
+  private configurePortfolio(
+    wallet?: chain.WalletType): this {
     const initialPortfolio = {
       [this.table.baseAsset.id]: 0
     }
@@ -66,7 +54,28 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public addAsset(asset: ChainAssetType, wallet?: ChainWalletType): this {
+  public configure(config: ConfigureParams): this {
+    super.configure(config)
+
+    const { asset, token, wallet } = config
+
+    this.updateTable({ asset, wallet })
+
+    this.table.portfolio = {
+      global: {}
+    }
+
+    if (wallet)
+      this.table.portfolio[getWalletId(wallet)] = {}
+
+    // When both asset and token have been provided, add both to the portfolio
+    if (asset && token)
+      this.configurePortfolio(wallet)
+
+    return this
+  }
+
+  public addAsset(asset: chain.AssetType, wallet?: chain.WalletType): this {
     super.addAsset(asset, wallet)
 
     this.updateTable({ asset, wallet })
@@ -74,7 +83,7 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public rebalance(getPortfolio: GetPorfolioType, wallet: WalletType): this {
+  public rebalance(getPortfolio: GetPorfolioType, wallet: chain.WalletType): this {
     this.table.portfolio[getWalletId(wallet)] = calcPortfolio(getPortfolio, this.getWallet(wallet))
 
     this.table.portfolio.global = calcGlobalPortfolio(
@@ -86,7 +95,7 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public seed(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
+  public seed(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
     this.updateTable({ asset, wallet })
 
     this.addAsset(asset, wallet)
@@ -110,14 +119,14 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public isPortfolioEmpty(portfolio: PortfolioType): boolean {
+  public isPortfolioEmpty(portfolio: chain.PortfolioType): boolean {
     return Object.keys(portfolio).reduce(intoTotal(portfolio), 0) === 0
   }
 
   // TODO: rename and clarify usage
   protected updateTable(config: {
-    wallet?: ChainWalletType,
-    asset?: ChainAssetType
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
   }) {
     super.updateTable(config)
 
