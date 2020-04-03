@@ -5,7 +5,8 @@ import {
 } from './utils'
 
 import {
-  GetPorfolioType
+  GetPorfolioType,
+  ConfigureParams
 } from './types'
 
 import {
@@ -41,8 +42,10 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public configure(asset: AssetHardType, token?: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this {
-    super.configure(asset, token, baseAsset)
+  public configure(config: ConfigureParams): this {
+    super.configure(config)
+
+    const { asset, wallet } = config
 
     this.updateTable({ asset, wallet })
 

@@ -35,7 +35,12 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000, taupemist)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000,
+        wallet: taupemist
+      })
       .mint(100, 'usd', cole)
       .mint(110, 'usd', taupemist)
       .rebalance(flatten, taupemist)
@@ -72,11 +77,15 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000
+      })
       .mint(10, 'usd', taupemist)
 
     const { liboro } = chain.getState().contract
-    
+
     expect(liboro.table.portfolio.taupemist).to.deep.equal({
       liborodollar: 0,
       usd: 100
@@ -101,7 +110,11 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000
+      })
       .mint(100, 'usd', taupemist)
       .rebalance(() => ({
         liborodollar: 50,
@@ -132,7 +145,11 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000
+      })
       .mint(100, 'usd', taupemist)
       .rebalance(() => ({
         liborodollar: 50,
@@ -167,7 +184,11 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000
+      })
       .mint(100, 'usd', taupemist)
       .rebalance(() => ({
         liborodollar: 50,
@@ -207,7 +228,12 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000,
+        wallet: taupemist
+      })
       .mint(50, 'usd', taupemist)
 
     const { liboro } = chain.getState().contract
@@ -223,7 +249,11 @@ describe('Forge', () => {
 
     new ForgeContract('tiny')
       .deploy(chain)
-      .configure('usd', 'tinydollar', 100)
+      .configure({
+        asset: 'usd',
+        token: 'tinydollar',
+        baseAsset: 100
+      })
       .mint(50, 'usd', taupemist)
 
     const { tiny } = chain.getState().contract
@@ -239,7 +269,11 @@ describe('Forge', () => {
 
     new ForgeContract('large')
       .deploy(chain)
-      .configure('usd', 'largedollar', 10000)
+      .configure({
+        asset: 'usd',
+        token: 'largedollar',
+        baseAsset: 10000
+      })
       .mint(100, 'usd', taupemist)
 
     const { large } = chain.getState().contract
@@ -268,10 +302,14 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 1000)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 1000
+      })
       .mint(50, 'usd', taupemist)
       .burn(47.6, 'usd', taupemist)
-    
+
     const { wallet } = chain.getState()
     const { liboro } = chain.getState().contract
 
@@ -308,7 +346,11 @@ describe('Forge', () => {
 
     new ForgeContract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 100
+      })
       .mint(50, 'usd', taupemist)
       .transfer(20, 'liborodollar', taupemist, cole)
 

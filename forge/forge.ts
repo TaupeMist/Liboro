@@ -28,7 +28,8 @@ import {
 
 import {
   PortfolioContract,
-  calcGlobalPortfolio
+  calcGlobalPortfolio,
+  ConfigureParams
 } from '../portfolio'
 
 export class ForgeContract extends PortfolioContract {
@@ -46,8 +47,10 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this {
-    super.configure(asset, token, baseAsset)
+  public configure(config: ConfigureParams): this {
+    super.configure(config)
+
+    const { asset, wallet } = config
 
     this.updateTable({ asset, wallet })
 

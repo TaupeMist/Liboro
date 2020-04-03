@@ -1,6 +1,5 @@
 import {
   addContract,
-  AssetHardType,
   StoreType,
   AssetType as ChainAssetType,
   WalletType as ChainWalletType
@@ -11,7 +10,8 @@ import {
   WalletType,
   AssetType,
   IContract,
-  ContractStateType
+  ContractStateType,
+  ConfigureParams
 } from './types'
 
 import {
@@ -19,10 +19,6 @@ import {
   setTable,
   transfer
 } from './commands'
-
-import {
-  getWalletId
-} from './utils'
 
 import {
   getWallet,
@@ -101,8 +97,10 @@ export class Contract implements IContract {
     return this
   }
 
-  public configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000): this {
+  public configure(config: ConfigureParams): this {
     if (!this.chain) throw new Error('Chain does not exist. Chain must first be deployed.')
+
+    const { asset, token, baseAsset } = config
 
     this.addAsset(asset)
     this.addAsset(token)

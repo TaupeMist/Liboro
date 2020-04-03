@@ -59,3 +59,9 @@ export interface IContract {
   assets: ContractStateType['assets'],
   table: ContractStateType['table']
 }
+
+export type ConfigureParams = {
+  asset: chain.AssetHardType,
+  token?: chain.AssetType,
+  baseAsset?: number
+}

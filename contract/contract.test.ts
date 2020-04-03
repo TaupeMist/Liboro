@@ -1,7 +1,7 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import { Chain, addWallet, WalletType } from '../chain'
+import { Chain } from '../chain'
 
 import {
   Contract
@@ -27,7 +27,11 @@ describe('Contract', () => {
 
     new Contract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 100
+      })
 
     const { liboro } = chain.getState().contract
 
@@ -50,7 +54,11 @@ describe('Contract', () => {
 
     new Contract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 100
+      })
       .addAsset('eos')
 
     const { liboro } = chain.getState().contract
@@ -80,7 +88,11 @@ describe('Contract', () => {
 
     new Contract('liboro')
       .deploy(chain)
-      .configure('usd', 'liborodollar', 100)
+      .configure({
+        asset: 'usd',
+        token: 'liborodollar',
+        baseAsset: 100
+      })
       .addToken('taupemist')
 
     const { liboro } = chain.getState().contract
