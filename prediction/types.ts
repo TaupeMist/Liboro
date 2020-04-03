@@ -16,5 +16,6 @@ export type BooleanPrediction = {
 export type Prediction = BooleanPrediction
 
 export type ConfigureParams = {
-  asset: chain.AssetHardType
+  asset: chain.AssetHardType,
+  wallet?: chain.WalletType
 }

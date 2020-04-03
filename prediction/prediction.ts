@@ -1,34 +1,26 @@
 import {
   CreatePrediction,
   Prediction,
-  ConfigureParams
-} from './types'
-
-import {
+  ConfigureParams,
   getPrediction
-} from './utils'
+} from '.'
 
-import {
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType,
-} from '../chain'
+import * as chain from '../chain'
 
-import {
-  PortfolioContract
-} from '../portfolio'
+import * as portfolio from '../portfolio'
 
-export class PredictionContract extends PortfolioContract {
+export class PredictionContract extends portfolio.PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
   public configure(config: ConfigureParams): this {
     super.configure(config)
 
-    const { asset } = config
+    const { asset, wallet } = config
 
-    this.updateTable({ asset })
+    this.updateTable({ asset, wallet })
 
-    this.addAsset('yes')
-    this.addAsset('no')
+    this.addAsset('yes', wallet)
+    this.addAsset('no', wallet)
 
     return this
   }
@@ -41,8 +33,8 @@ export class PredictionContract extends PortfolioContract {
 
   // TODO: rename and clarify usage
   protected updateTable(config: {
-    wallet?: ChainWalletType,
-    asset?: ChainAssetType
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
   }) {
     super.updateTable(config)
   }
