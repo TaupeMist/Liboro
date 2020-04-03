@@ -27,7 +27,9 @@ context('Prediction', () => {
 
       new PredictionContract('predict')
         .deploy(chain)
-        .configure('liborodollar')
+        .configure({
+          asset: 'liborodollar'
+        })
 
       const { predict } = chain.getState().contract
 

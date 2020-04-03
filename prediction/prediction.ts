@@ -1,6 +1,7 @@
 import {
   CreatePrediction,
-  Prediction
+  Prediction,
+  ConfigureParams
 } from './types'
 
 import {
@@ -10,7 +11,6 @@ import {
 import {
   AssetType as ChainAssetType,
   WalletType as ChainWalletType,
-  AssetHardType
 } from '../chain'
 
 import {
@@ -20,8 +20,10 @@ import {
 export class PredictionContract extends PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
-  public configure(asset: AssetHardType): this {
-    super.configure(asset)
+  public configure(config: ConfigureParams): this {
+    super.configure(config)
+
+    const { asset } = config
 
     this.updateTable({ asset })
 
