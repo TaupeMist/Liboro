@@ -1,21 +1,22 @@
 import * as chain from '../chain'
 
-export type CreatePrediction = {
-  value: number
+export type ConfigureParams = {
+  asset: chain.AssetHardType,
+  wallet?: chain.WalletType
 }
 
-export type BooleanVote = {
-  value: number
+export type getPredictionSummaryParams = {
+  value: number,
+  wallet: chain.WalletType
 }
 
 export type BooleanPrediction = {
-  yes: BooleanVote,
-  no: BooleanVote
+  yes: number,
+  no: number
 }
 
 export type Prediction = BooleanPrediction
 
-export type ConfigureParams = {
-  asset: chain.AssetHardType,
-  wallet?: chain.WalletType
+export type PredictionSummary = {
+  prediction: Prediction
 }

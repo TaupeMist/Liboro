@@ -37,30 +37,18 @@ context('Prediction', () => {
 
     it('can return correct value', () => {
       expect(getPrediction(50)).to.deep.equal({
-        yes: {
-          value: 50
-        },
-        no: {
-          value: 50
-        }
+        yes: 50,
+        no: 50
       })
 
       expect(getPrediction(20)).to.deep.equal({
-        yes: {
-          value: 20
-        },
-        no: {
-          value: 80
-        }
+        yes: 20,
+        no: 80
       })
 
       expect(getPrediction(87)).to.deep.equal({
-        yes: {
-          value: 87
-        },
-        no: {
-          value: 13
-        }
+        yes: 87,
+        no: 13
       })
     })
   })

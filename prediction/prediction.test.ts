@@ -5,7 +5,7 @@ import { Chain, addWallet, WalletType } from '../chain'
 
 import {
   PredictionContract
-} from './prediction'
+} from '.'
 
 context('Prediction', () => {
   describe('PredictionContract', () => {
@@ -43,6 +43,34 @@ context('Prediction', () => {
       })
     })
 
-    it('can make prediction', () => {})
+    it('can update prediction', () => {
+      const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+      const taupemist: WalletType = {
+        id: 'taupemist',
+        assets: {
+          usd: 1000
+        }
+      }
+
+      chain.execute(addWallet(taupemist))
+
+      new PredictionContract('predict')
+        .deploy(chain)
+        .configure({
+          asset: 'liborodollar',
+          wallet: taupemist
+        })
+        .updatePrediction(60, taupemist)
+
+      const { predict } = chain.getState().contract
+
+      expect(predict.table.portfolio.taupemist).to.deep.equal({
+        yes: 60,
+        no: 40
+      })
+    })
+
+    it('get prediction summary', () => {})
   })
 })
