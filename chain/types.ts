@@ -1,6 +1,6 @@
 import { Contract } from '../contract'
 
-export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos'
+export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos' | 'liborodollar'
 
 export type AssetType = AssetHardType | string
 

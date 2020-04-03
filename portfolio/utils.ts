@@ -5,15 +5,17 @@ import {
 import {
   AssetType as ChainAssetType,
   WalletType as ChainWalletType,
+  PortfolioType
 } from '../chain'
 
 import {
   format,
   WalletType,
   AssetType,
-  PortfolioType,
   TableType
 } from '../contract'
+
+export const intoTotal = (portfolio: PortfolioType) => (acc: number, assetId: string): number => acc + portfolio[assetId]
 
 export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: ChainAssetType[] = []): number => {
   const excludeAssets = (asset: ChainAssetType): boolean => excludedAssets.indexOf(asset) === -1
@@ -22,9 +24,7 @@ export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: Chai
     .keys(portfolio)
     .filter(excludeAssets)
 
-  const intoTotal = (acc: number, assetId: string): number => acc + portfolio[assetId]
-
-  return assetIds.reduce(intoTotal, 0)
+  return assetIds.reduce(intoTotal(portfolio), 0)
 }
 
 export const isPortfolioValid = (portfolio: PortfolioType): boolean => {
@@ -37,7 +37,7 @@ export const calcPortfolio = (getPortfolio: GetPorfolioType, wallet: WalletType)
   if (!isPortfolioValid(nextPortfolio))
     throw new Error(`Portfolio total/sum expected to equal 100. ${JSON.stringify(nextPortfolio)}`)
 
-  return nextPortfolio 
+  return nextPortfolio
 }
 
 export const flatten = (portfolio: PortfolioType): PortfolioType => {
@@ -87,7 +87,7 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAss
     throw new Error(`Portfolio is yet to be balanced/flattened therefor, should be invalid. ${JSON.stringify(portfolioToBalance)}`)
 
   const total = getPortfolioTotal(portfolioToBalance)
-    
+
   return total === 0 ? flatten(portfolioToBalance) : balance(portfolioToBalance)
 }
 

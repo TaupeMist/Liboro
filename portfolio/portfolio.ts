@@ -1,6 +1,7 @@
 import {
   calcPortfolio,
-  calcGlobalPortfolio
+  calcGlobalPortfolio,
+  intoTotal
 } from './utils'
 
 import {
@@ -16,7 +17,8 @@ import {
   AssetType as ChainAssetType,
   WalletType as ChainWalletType,
   AssetHardType,
-  StoreType
+  StoreType,
+  PortfolioType
 } from '../chain'
 
 import {
@@ -39,13 +41,17 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this {
+  public configure(asset: AssetHardType, token?: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this {
     super.configure(asset, token, baseAsset)
 
+    this.updateTable({ asset, wallet })
+
     const initialPortfolio = {
-      [this.table.baseToken.id]: 0,
-      [this.table.baseAsset.id]: 100
+      [this.table.baseAsset.id]: 0
     }
+
+    if (this.table.baseToken)
+      initialPortfolio[this.table.baseToken.id] = 0
 
     this.table.portfolio = {
       global: { ...initialPortfolio }
@@ -78,11 +84,31 @@ export class PortfolioContract extends Contract {
   }
 
   public seed(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
+    this.updateTable({ asset, wallet })
+
     this.addAsset(asset, wallet)
 
     this.chain.execute(seed(amount, asset, wallet, this.id))
 
+    if (this.isPortfolioEmpty(this.table.portfolio.global)) {
+      this.table.portfolio.global = {
+        ...this.table.portfolio.global,
+        [asset]: 100
+      }
+    }
+
+    if (this.isPortfolioEmpty(this.getWallet(wallet).portfolio)) {
+      this.table.portfolio[wallet.id] = {
+        ...this.table.portfolio[wallet.id],
+        [asset]: 100
+      }
+    }
+
     return this
+  }
+
+  public isPortfolioEmpty(portfolio: PortfolioType): boolean {
+    return Object.keys(portfolio).reduce(intoTotal(portfolio), 0) === 0
   }
 
   // TODO: rename and clarify usage
@@ -105,10 +131,10 @@ export class PortfolioContract extends Contract {
     }
 
     if (wallet) {
-      // If wallet portfolio does not exist, set wallet portfolio asset to current global portfolio
+      // If wallet portfolio does not exist, set wallet portfolio to empty
       const isNewWalletPortfolio = !this.table.portfolio[getWalletId(wallet)]
       if (isNewWalletPortfolio) {
-        this.table.portfolio[getWalletId(wallet)] = { ...this.table.portfolio.global }
+        this.table.portfolio[getWalletId(wallet)] = {}
       }
 
       // If wallet portfolio's asset does not exist, set wallet portfolio's asset to 0

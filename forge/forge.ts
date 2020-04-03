@@ -15,12 +15,15 @@ import {
 
 import {
   AssetHardType,
-  WalletType,
-  PortfolioType
+  PortfolioType,
+  AssetType as ChainAssetType,
+  WalletType as ChainWalletType,
+  StoreType
 } from '../chain'
 
 import {
-  format
+  format,
+  getWalletId
 } from '../contract'
 
 import {
@@ -31,7 +34,41 @@ import {
 export class ForgeContract extends PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
-  public mint(amount: number, asset: AssetHardType, wallet: WalletType): this {
+  public deploy(chain: StoreType): this {
+    try {
+      super.deploy(chain)
+
+      this.updateTable({})
+    } catch (ex) {
+      throw new Error('Could not deploy contract.')
+    }
+
+    return this
+  }
+
+  public configure(asset: AssetHardType, token: ChainAssetType, baseAsset = 10000, wallet?: ChainWalletType): this {
+    super.configure(asset, token, baseAsset)
+
+    this.updateTable({ asset, wallet })
+
+    const initialPortfolio = {
+      [this.table.baseAsset.id]: 100
+    }
+
+    if (this.table.baseToken)
+      initialPortfolio[this.table.baseToken.id] = 0
+
+    this.table.portfolio = {
+      global: { ...initialPortfolio }
+    }
+
+    if (wallet)
+      this.table.portfolio[getWalletId(wallet)] = { ...initialPortfolio }
+
+    return this
+  }
+
+  public mint(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
     const deposit = {
       ...this.getAsset(asset),
       value: amount
@@ -83,7 +120,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public burn(amount: number, asset: AssetHardType, wallet: WalletType): this {
+  public burn(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
     const burner = this.getWallet(wallet)
 
     if (!burner.canBurn(amount, asset))
@@ -142,5 +179,33 @@ export class ForgeContract extends PortfolioContract {
     }
 
     return this
+  }
+
+  // TODO: rename and clarify usage
+  protected updateTable(config: {
+    wallet?: ChainWalletType,
+    asset?: ChainAssetType
+  }) {
+    if (!this.table.portfolio)
+      this.table.portfolio = {
+        global: {}
+      }
+
+    const { wallet, asset } = config
+
+    if (wallet) {
+      // If wallet portfolio does not exist, set wallet portfolio asset to current global portfolio
+      const isNewWalletPortfolio = !this.table.portfolio[getWalletId(wallet)]
+      if (isNewWalletPortfolio) {
+        this.table.portfolio[getWalletId(wallet)] = { ...this.table.portfolio.global }
+      }
+
+      // If wallet portfolio's asset does not exist, set wallet portfolio's asset to 0
+      const isNewAsset = asset && !this.table.portfolio[getWalletId(wallet)][asset]
+      if (isNewAsset)
+        this.table.portfolio[getWalletId(wallet)][asset] = 0
+    }
+
+    super.updateTable(config)
   }
 }

@@ -61,13 +61,14 @@ describe('Portfolio', () => {
 
     expect(liboro.assets.eos).to.equal(100)
 
-    expect(liboro.table.portfolio.taupemist).to.exist
-    expect(liboro.table.portfolio.taupemist.usd).to.equal(100)
-    expect(liboro.table.portfolio.taupemist.liborodollar).to.equal(0)
-    expect(liboro.table.portfolio.taupemist.eos).to.equal(0)
+    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+      eos: 100
+    })
 
-    expect(liboro.table.portfolio.global).to.exist
-    expect(liboro.table.portfolio.global.usd).to.equal(100)
-    expect(liboro.table.portfolio.global.eos).to.equal(0)
+    expect(liboro.table.portfolio.global).to.deep.equal({
+      eos: 100,
+      liborodollar: 0,
+      usd: 0
+    })
   })
 })
