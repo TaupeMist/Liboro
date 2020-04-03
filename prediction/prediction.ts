@@ -9,17 +9,22 @@ import {
 
 import {
   AssetType as ChainAssetType,
-  WalletType as ChainWalletType
+  WalletType as ChainWalletType,
+  AssetHardType
 } from '../chain'
 
 import {
-  Contract
-} from '../contract'
+  PortfolioContract
+} from '../portfolio'
 
-export class PredictionContract extends Contract {
+export class PredictionContract extends PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
-  public configure(): this {
+  public configure(asset: AssetHardType): this {
+    super.configure(asset)
+
+    this.updateTable({ asset })
+
     this.addAsset('yes')
     this.addAsset('no')
 
