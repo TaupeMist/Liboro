@@ -35,8 +35,13 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  private configurePortfolio(
-    wallet?: chain.WalletType): this {
+  public configure(config: ConfigureParams): this {
+    super.configure(config)
+
+    const { asset, wallet } = config
+
+    this.updateTable({ asset, wallet })
+
     const initialPortfolio = {
       [this.table.baseAsset.id]: 0
     }
@@ -50,27 +55,6 @@ export class PortfolioContract extends Contract {
 
     if (wallet)
       this.table.portfolio[getWalletId(wallet)] = { ...initialPortfolio }
-
-    return this
-  }
-
-  public configure(config: ConfigureParams): this {
-    super.configure(config)
-
-    const { asset, token, wallet } = config
-
-    this.updateTable({ asset, wallet })
-
-    this.table.portfolio = {
-      global: {}
-    }
-
-    if (wallet)
-      this.table.portfolio[getWalletId(wallet)] = {}
-
-    // When both asset and token have been provided, add both to the portfolio
-    if (asset && token)
-      this.configurePortfolio(wallet)
 
     return this
   }
