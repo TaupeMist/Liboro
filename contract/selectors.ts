@@ -1,35 +1,17 @@
 import {
-  Contract
-} from './contract'
-
-import {
+  Contract,
   WalletType,
   AssetType,
   ComparisonType,
-  WalletPortfolioType,
   ContractStateType,
-  TableType
-} from './types'
-
-import {
-  getWalletId,
   format
-} from './utils'
+} from '.'
 
-import {
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType,
-  AssetHardType,
-  StateType
-} from '../chain'
+import * as chain from '../chain'
 
-export const getContract = (state: StateType, id: string): Contract => state.contract[id]
+export const getContract = (state: chain.StateType, id: string): Contract => state.contract[id]
 
-export const getTable = (state: StateType, id: string): ContractStateType['table'] => getContract(state, id).table
-
-export const getPortfolio = (state: ContractStateType): TableType['portfolio'] => {
-  return state.table.portfolio
-}
+export const getTable = (state: chain.StateType, id: string): ContractStateType['table'] => getContract(state, id).table
 
 export const getComparison = (state: ContractStateType) => (asset: AssetType, targetAsset: AssetType): ComparisonType => {
   const comparison: ComparisonType = {
@@ -40,7 +22,7 @@ export const getComparison = (state: ContractStateType) => (asset: AssetType, ta
   return comparison
 }
 
-export const getAsset = (state: ContractStateType) => (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
+export const getAsset = (state: ContractStateType) => (asset: chain.AssetType, prevAsset?: AssetType): AssetType => {
   const predefinedAsset = {
     ...state.table.asset[asset],
     ...prevAsset
@@ -69,60 +51,13 @@ export const getWalletRatioOfMarketCap = (state: ContractStateType) => (wallet: 
     : 0
 }
 
-export const getPortfolioRatio = (wallet: WalletType, assetId: ChainAssetType) => {
-  return wallet.portfolio[assetId] / 100
-}
-
-export const getReserve = (state: ContractStateType) => (wallet: WalletType, assetId: ChainAssetType): number => {
-  return format(wallet.ratioOfMarketCap * state.table.asset[assetId].marketCap * getPortfolioRatio(wallet, assetId))
-}
-
-export const getReserves = (state: ContractStateType) => (wallet: WalletType): WalletPortfolioType => {
-  const assetIds = Object.keys(wallet.portfolio)
-
-  const intoPortfolio = (acc: WalletPortfolioType, assetId: ChainAssetType): WalletPortfolioType => {
-    const liboroAsset = getAsset(state)(assetId)
-    const value = wallet.portfolio[assetId]
-    const marketCap = assetId === state.table.baseToken.id
-      ? state.table.baseToken.marketCap
-      : state.table.asset[assetId].marketCap
-    const ratio = getPortfolioRatio(wallet, assetId)
-    const reserve = getReserve(state)(wallet, assetId)
-    const baseTokenValue = ratio * wallet.assets[state.table.baseToken.id]
-
-    return {
-      ...acc,
-      [assetId]: {
-        ...liboroAsset,
-        value,
-        marketCap,
-        ratio,
-        reserve,
-        baseTokenValue
-      }
-    }
-  }
-
-  return assetIds.reduce(intoPortfolio, {})
-}
-
-export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: AssetHardType): boolean => {
-  return wallet.reserves[assetId].baseTokenValue >= amount
-}
-
-export const getWallet = (state: ContractStateType) => (wallet: ChainWalletType): WalletType => {
-  const portfolio = getPortfolio(state)[getWalletId(wallet)] || {}
-
-  const liboroWallet: WalletType = {
+export const getWallet = (state: ContractStateType) => (wallet: chain.WalletType): WalletType => {
+  const nextWallet = {
     ...wallet,
-    portfolio
+    ratioOfMarketCap: getWalletRatioOfMarketCap(state)(wallet)
   }
 
-  liboroWallet.ratioOfMarketCap = getWalletRatioOfMarketCap(state)(liboroWallet)
-  liboroWallet.reserves = getReserves(state)(liboroWallet)
-  liboroWallet.canBurn = getCanBurn(liboroWallet)
-
-  return liboroWallet
+  return nextWallet
 }
 
 /**

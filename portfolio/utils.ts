@@ -1,24 +1,21 @@
 import {
-  GetPorfolioType
-} from './types'
-
-import {
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType,
+  GetPorfolioType,
+  WalletType,
   PortfolioType
-} from '../chain'
+} from '.'
+
+import * as chain from '../chain'
 
 import {
   format,
-  WalletType,
   AssetType,
   TableType
 } from '../contract'
 
 export const intoTotal = (portfolio: PortfolioType) => (acc: number, assetId: string): number => acc + portfolio[assetId]
 
-export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: ChainAssetType[] = []): number => {
-  const excludeAssets = (asset: ChainAssetType): boolean => excludedAssets.indexOf(asset) === -1
+export const getPortfolioTotal = (portfolio: PortfolioType, excludedAssets: chain.AssetType[] = []): number => {
+  const excludeAssets = (asset: chain.AssetType): boolean => excludedAssets.indexOf(asset) === -1
 
   const assetIds = Object
     .keys(portfolio)
@@ -69,7 +66,7 @@ export const balance = (portfolio: PortfolioType): PortfolioType => {
   return assetIds.reduce(intoPortfolio, {} as PortfolioType)
 }
 
-export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAssetType) => {
+export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: chain.AssetType) => {
   const minusAsset = (id: string): boolean => id !== asset
 
   const assetIds = Object
@@ -89,7 +86,7 @@ export const getPortfolioMinusAsset = (portfolio: PortfolioType, asset: ChainAss
 }
 
 export const calcRebalanceWeight = (
-  wallet: ChainWalletType,
+  wallet: chain.WalletType,
   baseToken: AssetType,
   portfolio: TableType['portfolio']
 ): number => {

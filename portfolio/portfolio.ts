@@ -1,17 +1,13 @@
 import {
   calcPortfolio,
   calcGlobalPortfolio,
-  intoTotal
-} from './utils'
-
-import {
+  intoTotal,
   GetPorfolioType,
-  ConfigureParams
-} from './types'
-
-import {
-  seed
-} from './commands'
+  ConfigureParams,
+  WalletType,
+  seed,
+  getWallet
+} from '.'
 
 import * as chain from '../chain'
 
@@ -22,6 +18,10 @@ import {
 
 export class PortfolioContract extends Contract {
   public constructor(readonly id: string) { super(id) }
+
+  public getWallet = (wallet: chain.WalletType): WalletType => {
+    return getWallet(this.getState())(wallet)
+  }
 
   public deploy(chain: chain.StoreType): this {
     try {

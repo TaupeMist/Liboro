@@ -13,13 +13,7 @@ import {
   rebalanceBurn
 } from './burning'
 
-import {
-  AssetHardType,
-  PortfolioType,
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType,
-  StoreType
-} from '../chain'
+import * as chain from '../chain'
 
 import {
   format,
@@ -29,13 +23,14 @@ import {
 import {
   PortfolioContract,
   calcGlobalPortfolio,
-  ConfigureParams
+  ConfigureParams,
+  PortfolioType
 } from '../portfolio'
 
 export class ForgeContract extends PortfolioContract {
   public constructor(readonly id: string) { super(id) }
 
-  public deploy(chain: StoreType): this {
+  public deploy(chain: chain.StoreType): this {
     try {
       super.deploy(chain)
 
@@ -71,7 +66,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public mint(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
+  public mint(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
     const deposit = {
       ...this.getAsset(asset),
       value: amount
@@ -123,7 +118,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public burn(amount: number, asset: AssetHardType, wallet: ChainWalletType): this {
+  public burn(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
     const burner = this.getWallet(wallet)
 
     if (!burner.canBurn(amount, asset))
@@ -186,8 +181,8 @@ export class ForgeContract extends PortfolioContract {
 
   // TODO: rename and clarify usage
   protected updateTable(config: {
-    wallet?: ChainWalletType,
-    asset?: ChainAssetType
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
   }) {
     if (!this.table.portfolio)
       this.table.portfolio = {

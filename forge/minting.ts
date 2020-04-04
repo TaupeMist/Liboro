@@ -1,18 +1,21 @@
 import {
-  getPortfolioMinusAsset
-} from '../portfolio'
+  WalletType
+} from '.'
 
 import {
   format,
   asDecimal,
-  WalletType,
-  AssetType,
-  PortfolioType
+  AssetType
 } from '../contract'
+
+import {
+  PortfolioType,
+  getPortfolioMinusAsset
+} from '../portfolio'
 
 /**
  * Get the decimal ratio increase of the deposit towards the contract's asset balance
- * 
+ *
  * @param deposit the deposit amount to be added to the contract's balance
  * @param total the new total of minting token
  * @param globalPortfolio the global portfolio of this contract
@@ -29,7 +32,7 @@ export const getDepositRatio = (
 
 /**
  * Calculate the amount of token to be minted
- * 
+ *
  * @param deposit the token deposit required to trigger the minting
  * @param contractAsset the contract's balance of the asset being minted
  * @param baseAsset the base supply of the base token
@@ -54,11 +57,11 @@ export const calcMintPayable = (
 }
 
 /**
- * 
- * @param minting the asset to be minted 
- * @param wallet 
- * @param payable 
- * @param baseToken 
+ *
+ * @param minting the asset to be minted
+ * @param wallet
+ * @param payable
+ * @param baseToken
  */
 export const rebalanceMint = (
   minting: AssetType,

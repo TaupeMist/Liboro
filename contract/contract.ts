@@ -1,8 +1,7 @@
+import * as chain from '../chain';
+
 import {
-  addContract,
-  StoreType,
-  AssetType as ChainAssetType,
-  WalletType as ChainWalletType
+  addContract
 } from '../chain';
 
 import {
@@ -26,7 +25,7 @@ import {
 } from './selectors'
 
 export class Contract implements IContract {
-  protected chain?: StoreType
+  protected chain?: chain.StoreType
 
   public constructor(readonly id: string) {}
 
@@ -73,15 +72,15 @@ export class Contract implements IContract {
     }
   }
 
-  public getWallet = (wallet: ChainWalletType): WalletType => {
+  public getWallet = (wallet: chain.WalletType): WalletType => {
     return getWallet(this.getState())(wallet)
   }
 
-  public getAsset = (asset: ChainAssetType, prevAsset?: AssetType): AssetType => {
+  public getAsset = (asset: chain.AssetType, prevAsset?: AssetType): AssetType => {
     return getAsset(this.getState())(asset, prevAsset)
   }
 
-  public deploy(chain: StoreType): this {
+  public deploy(chain: chain.StoreType): this {
     if (this.chain) throw new Error('Chain already exists. Cannot override chain.')
 
     try {
@@ -120,7 +119,7 @@ export class Contract implements IContract {
     return this
   }
 
-  public addAsset(asset: ChainAssetType, wallet?: ChainWalletType): this {
+  public addAsset(asset: chain.AssetType, wallet?: chain.WalletType): this {
     this.chain.execute(addAsset(asset, this))
 
     this.updateTable({
@@ -135,7 +134,12 @@ export class Contract implements IContract {
     return this.addAsset(token)
   }
 
-  public transfer (amount: number, asset: ChainAssetType, sender: ChainWalletType, receiver: ChainWalletType) {
+  public transfer (
+    amount: number,
+    asset: chain.AssetType,
+    sender: chain.WalletType,
+    receiver: chain.WalletType
+  ) {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this
@@ -143,8 +147,8 @@ export class Contract implements IContract {
 
   // TODO: rename and clarify usage
   protected updateTable(config: {
-    wallet?: ChainWalletType,
-    asset?: ChainAssetType
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
   }) {
     if (!this.table.asset)
       this.table.asset = {}

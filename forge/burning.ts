@@ -3,13 +3,13 @@ import {
 } from '../chain'
 
 import {
-  getPortfolioMinusAsset
+  getPortfolioMinusAsset,
+  WalletType
 } from '../portfolio'
 
 import {
   format,
   asDecimal,
-  WalletType,
   AssetType
 } from '../contract'
 
@@ -24,7 +24,7 @@ export const calcBurnPayable = (
   return {
     ...withdrawal,
     value: format(percentageOfMarketCap * contractAsset * burner.reserves[withdrawal.id].ratio)
-  } 
+  }
 }
 
 export const rebalanceBurn = (
