@@ -52,10 +52,10 @@ export const getWalletRatioOfMarketCap = (state: ContractStateType) => (wallet: 
 }
 
 export const getWallet = (state: ContractStateType) => (wallet: chain.WalletType): WalletType => {
-  const nextWallet = {
-    ...wallet,
-    ratioOfMarketCap: getWalletRatioOfMarketCap(state)(wallet)
-  }
+  const nextWallet: WalletType = { ...wallet }
+
+  if (state.table.baseToken)
+    nextWallet.ratioOfMarketCap = getWalletRatioOfMarketCap(state)(wallet)
 
   return nextWallet
 }
