@@ -1,13 +1,13 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import { getPrediction } from './utils';
+import { createPrediction } from './utils';
 
 context('Prediction', () => {
-  describe('getPrediction', () => {
+  describe('createPrediction', () => {
     it('should throw when value is less than 100', () => {
       const getPredictionWithInvalidValue = () => {
-        return getPrediction(0)
+        return createPrediction(0)
       }
 
       expect(getPredictionWithInvalidValue).to.throw()
@@ -15,7 +15,7 @@ context('Prediction', () => {
 
     it('should throw when value is greater than 100', () => {
       const getPredictionWithInvalidValue = () => {
-        return getPrediction(101)
+        return createPrediction(101)
       }
 
       expect(getPredictionWithInvalidValue).to.throw()
@@ -23,30 +23,30 @@ context('Prediction', () => {
 
     it('should not throw when value is correct', () => {
       const getPredictionWithLowValue = () => {
-        return getPrediction(1)
+        return createPrediction(1)
       }
 
       expect(getPredictionWithLowValue).to.not.throw()
 
       const getPredictionWithHighValue = () => {
-        return getPrediction(100)
+        return createPrediction(100)
       }
 
       expect(getPredictionWithHighValue).to.not.throw()
     })
 
     it('can return correct value', () => {
-      expect(getPrediction(50)).to.deep.equal({
+      expect(createPrediction(50)).to.deep.equal({
         yes: 50,
         no: 50
       })
 
-      expect(getPrediction(20)).to.deep.equal({
+      expect(createPrediction(20)).to.deep.equal({
         yes: 20,
         no: 80
       })
 
-      expect(getPrediction(87)).to.deep.equal({
+      expect(createPrediction(87)).to.deep.equal({
         yes: 87,
         no: 13
       })

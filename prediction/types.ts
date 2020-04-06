@@ -1,5 +1,9 @@
 import * as chain from '../chain'
 
+import * as portfolio from '../portfolio'
+
+export type TokenType = 'yes' | 'no'
+
 export type ConfigureParams = {
   asset: chain.AssetHardType,
   wallet?: chain.WalletType
@@ -7,16 +11,17 @@ export type ConfigureParams = {
 
 export type getPredictionSummaryParams = {
   value: number,
-  wallet: chain.WalletType
+  wallet: portfolio.WalletType,
+  currPrediction: PredictionType
 }
 
 export type BooleanPrediction = {
-  yes: number,
-  no: number
+  [T in TokenType]: number
 }
 
-export type Prediction = BooleanPrediction
+export type PredictionType = BooleanPrediction
 
 export type PredictionSummary = {
-  prediction: Prediction
+  prediction: PredictionType,
+  nextBalance: number
 }

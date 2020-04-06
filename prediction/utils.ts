@@ -1,11 +1,11 @@
 import {
-  Prediction,
+  PredictionType,
   PredictionSummary,
   getPredictionSummaryParams,
   BooleanPrediction
-} from './types';
+} from '.';
 
-export const getPrediction = (value: number): Prediction => {
+export const createPrediction = (value: number): PredictionType => {
   if (value > 100)
     throw new Error('Value must be less than 100')
 
@@ -18,12 +18,19 @@ export const getPrediction = (value: number): Prediction => {
   }
 }
 
-export const getPredictionSummary = (params: getPredictionSummaryParams): PredictionSummary => {
-  const { value } = params
-  const prediction = getPrediction(value)
+export const getPredictionSummary = ({
+  value,
+  wallet,
+  currPrediction
+}: getPredictionSummaryParams): PredictionSummary => {
+  const prediction = createPrediction(value)
+
+  // TODO: calculate next balance
+  const nextBalance = 0
 
   return {
-    prediction
+    prediction,
+    nextBalance
   }
 }
 
