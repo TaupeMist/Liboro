@@ -14,9 +14,10 @@ export type CreditType = {
 }
 
 export type WalletType = portfolio.WalletType & {
-  prediction: PredictionType,
   credit: CreditType,
-  balance: number
+  balance: {
+    [A in chain.AssetHardType | TokenType]?: number
+  }
 }
 
 export type getPredictionSummaryParams = {

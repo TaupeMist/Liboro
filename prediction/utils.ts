@@ -25,12 +25,10 @@ export const getPredictionSummary = ({
   const prediction = createPrediction(value)
 
   // TODO: calculate next balance
-  const nextBalance = 80
+  const nextBalance = 0
 
   // TODO: calculate next credit
-  const nextCredit = {
-    yes: 20
-  }
+  const nextCredit = {}
 
   return {
     prediction,

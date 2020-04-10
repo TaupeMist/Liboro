@@ -79,8 +79,9 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     // console.log('fullWallet', fullWallet, this.getWallet(this.table.owner))
 
-    // this.buy(amount * fullWallet.credit.yes.ratio, 'yes', wallet)
-    // this.buy(amount * fullWallet.credit.no.ratio, 'no', wallet)
+    const fullWallet = this.getWallet(wallet)
+
+    // console.log('buy', amount, fullWallet)
 
     this.table.balance[wallet.id] =+ amount
 
