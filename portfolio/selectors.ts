@@ -63,17 +63,17 @@ export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: chai
 export const getWallet = (state: contract.ContractStateType) => (wallet: chain.WalletType): WalletType => {
   const portfolio = getPortfolio(state)[wallet.id] || {}
 
-  const portfolioWallet: WalletType = {
+  const fullWallet: WalletType = {
     ...contract.getWallet(state)(wallet),
     portfolio
   }
 
-  portfolioWallet.reserves = getReserves(state)(portfolioWallet)
+  fullWallet.reserves = getReserves(state)(fullWallet)
 
   if (state.table.baseToken) {
-    portfolioWallet.ratioOfMarketCap = contract.getWalletRatioOfMarketCap(state)(portfolioWallet)
-    portfolioWallet.canBurn = getCanBurn(portfolioWallet)
+    fullWallet.ratioOfMarketCap = contract.getWalletRatioOfMarketCap(state)(fullWallet)
+    fullWallet.canBurn = getCanBurn(fullWallet)
   }
 
-  return portfolioWallet
+  return fullWallet
 }
