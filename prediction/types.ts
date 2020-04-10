@@ -9,10 +9,19 @@ export type ConfigureParams = {
   wallet?: chain.WalletType
 }
 
+export type CreditType = {
+  [T in TokenType]?: number
+}
+
+export type WalletType = portfolio.WalletType & {
+  prediction: PredictionType,
+  credit: CreditType,
+  balance: number
+}
+
 export type getPredictionSummaryParams = {
   value: number,
-  wallet: portfolio.WalletType,
-  currPrediction: PredictionType
+  wallet: WalletType
 }
 
 export type BooleanPrediction = {
@@ -23,5 +32,15 @@ export type PredictionType = BooleanPrediction
 
 export type PredictionSummary = {
   prediction: PredictionType,
-  nextBalance: number
+  nextBalance: number,
+  nextCredit: CreditType
+}
+
+export type TableType = portfolio.TableType & {
+  balance: {
+    [K: string]: number
+  },
+  credit: {
+    [K: string]: CreditType
+  }
 }

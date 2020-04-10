@@ -20,17 +20,22 @@ export const createPrediction = (value: number): PredictionType => {
 
 export const getPredictionSummary = ({
   value,
-  wallet,
-  currPrediction
+  wallet
 }: getPredictionSummaryParams): PredictionSummary => {
   const prediction = createPrediction(value)
 
   // TODO: calculate next balance
-  const nextBalance = 0
+  const nextBalance = 80
+
+  // TODO: calculate next credit
+  const nextCredit = {
+    yes: 20
+  }
 
   return {
     prediction,
-    nextBalance
+    nextBalance,
+    nextCredit
   }
 }
 

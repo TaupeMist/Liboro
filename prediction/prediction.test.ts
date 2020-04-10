@@ -36,7 +36,7 @@ context('Prediction', () => {
 
       expect(predict.table.balance).to.exist
 
-      expect(predict.table.reserve).to.exist
+      expect(predict.table.credit).to.exist
     })
 
     describe('updatePrediction', () => {
@@ -119,7 +119,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(900)
       })
 
-      it('can set reserve after update', () => {
+      it('can set credit after update', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
         const taupemist: WalletType = {
@@ -155,7 +155,7 @@ context('Prediction', () => {
           })
 
           expect(predict.table.balance.cole).to.equal(80)
-          expect(predict.table.reserves.yes.value).to.equal(20)
+          expect(predict.table.credit.cole.yes).to.equal(20)
 
           const { wallet } = chain.getState()
 
