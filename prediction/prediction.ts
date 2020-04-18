@@ -40,14 +40,10 @@ export class PredictionContract extends portfolio.PortfolioContract {
   public updatePrediction(value: number, wallet: chain.WalletType): this {
     this.updateTable({ wallet })
 
-    const fullWallet = this.getWallet(wallet)
-
     const summary = getPredictionSummary({
       value,
-      wallet: fullWallet
+      wallet: this.getWallet(wallet)
     })
-
-    console.log('summary', summary)
 
     // TODO: return portfolio type instead of BooleanPrediction
     this.table.portfolio[wallet.id] = summary.prediction
@@ -78,14 +74,11 @@ export class PredictionContract extends portfolio.PortfolioContract {
   private buy(amount: number, wallet: chain.WalletType): this {
     this.updateTable({ wallet })
 
-    // const fullWallet = this.getWallet(wallet)
-
-    // console.log('fullWallet', fullWallet, this.getWallet(this.table.owner))
-
     const fullWallet = this.getWallet(wallet)
 
-    // console.log('buy', amount, fullWallet)
-
+    // TODO: instead of simply increasing the balance,
+    // TODO: consider any credit that the user may have,
+    // TODO: then calculate the amount of new tokens to be minted
     this.table.balance[wallet.id] = calcBalance(amount, fullWallet)
 
     return this
