@@ -74,7 +74,10 @@ context('Prediction', () => {
           no: 40
         })
 
-        expect(predict.table.balance.cole).to.equal(0)
+        expect(predict.table.balance.cole).to.deep.equal({
+          yes: 0,
+          no: 0
+        })
       })
 
       it('can set default prediction', () => {
@@ -111,7 +114,10 @@ context('Prediction', () => {
             no: 50
           })
 
-          expect(predict.table.balance.cole).to.equal(100)
+          expect(predict.table.balance.cole).to.deep.equal({
+            yes: 50,
+            no: 50
+          })
 
           const { wallet } = chain.getState()
 
@@ -144,7 +150,7 @@ context('Prediction', () => {
             asset: 'liborodollar',
             wallet: taupemist
           })
-          .deposit(100, cole)
+          .deposit(200, cole)
           .updatePrediction(60, cole)
 
           const { predict } = chain.getState().contract
@@ -154,13 +160,117 @@ context('Prediction', () => {
             no: 40
           })
 
-          expect(predict.table.balance.cole).to.equal(80)
-          expect(predict.table.credit.cole.yes).to.equal(20)
+          expect(predict.table.balance.cole).to.deep.equal({
+            yes: 100,
+            no: 66.6667
+          })
+
+          expect(predict.table.credit.cole.no).to.equal(33.3333)
 
           const { wallet } = chain.getState()
 
-          expect(wallet.taupemist.assets.liborodollar).to.equal(100)
-          expect(wallet.cole.assets.liborodollar).to.equal(900)
+          expect(wallet.taupemist.assets.liborodollar).to.equal(200)
+          expect(wallet.cole.assets.liborodollar).to.equal(800)
+      })
+
+      it('can equalise an unequal prediction', () => {
+        const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+        const taupemist: WalletType = {
+          id: 'taupemist',
+          assets: {}
+        }
+
+        chain.execute(addWallet(taupemist))
+
+        const cole: WalletType = {
+          id: 'cole',
+          assets: {
+            liborodollar: 1000
+          }
+        }
+
+        chain.execute(addWallet(cole))
+
+        new PredictionContract('predict')
+          .deploy(chain)
+          .configure({
+            asset: 'liborodollar',
+            wallet: taupemist
+          })
+          .deposit(200, cole)
+          .updatePrediction(60, cole)
+          .updatePrediction(50, cole)
+
+          const { predict } = chain.getState().contract
+
+          expect(predict.table.portfolio.cole).to.deep.equal({
+            yes: 50,
+            no: 50
+          })
+
+          expect(predict.table.balance.cole).to.deep.equal({
+            yes: 100,
+            no: 100
+          })
+
+          expect(predict.table.credit.cole).to.deep.equal({})
+
+          const { wallet } = chain.getState()
+
+          expect(wallet.taupemist.assets.liborodollar).to.equal(200)
+          expect(wallet.cole.assets.liborodollar).to.equal(800)
+      })
+
+      it('can expand prediction', () => {
+        const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+        const taupemist: WalletType = {
+          id: 'taupemist',
+          assets: {}
+        }
+
+        chain.execute(addWallet(taupemist))
+
+        const cole: WalletType = {
+          id: 'cole',
+          assets: {
+            liborodollar: 1000
+          }
+        }
+
+        chain.execute(addWallet(cole))
+
+        new PredictionContract('predict')
+          .deploy(chain)
+          .configure({
+            asset: 'liborodollar',
+            wallet: taupemist
+          })
+          .deposit(200, cole)
+          .updatePrediction(60, cole)
+          .updatePrediction(80, cole)
+
+          const { predict } = chain.getState().contract
+
+          expect(predict.table.portfolio.cole).to.deep.equal({
+            yes: 80,
+            no: 20
+          })
+
+          expect(predict.table.balance.cole).to.deep.equal({
+            yes: 100,
+            no: 25
+          })
+
+          expect(predict.table.credit.cole).to.deep.equal({
+            no: 75
+          })
+
+          const { wallet } = chain.getState()
+
+          expect(wallet.taupemist.assets.liborodollar).to.equal(200)
+          expect(wallet.cole.assets.liborodollar).to.equal(800)
       })
     })
 

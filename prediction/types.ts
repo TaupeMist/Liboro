@@ -17,6 +17,9 @@ export type WalletType = portfolio.WalletType & {
   credit: CreditType,
   balance: {
     [A in chain.AssetHardType | TokenType]?: number
+  },
+  total: {
+    [A in chain.AssetHardType | TokenType]?: number
   }
 }
 
@@ -33,7 +36,9 @@ export type PredictionType = BooleanPrediction
 
 export type PredictionSummary = {
   prediction: PredictionType,
-  nextBalance: number,
+  nextBalance: {
+    [A in chain.AssetHardType | TokenType]?: number
+  },
   nextCredit: CreditType
 }
 

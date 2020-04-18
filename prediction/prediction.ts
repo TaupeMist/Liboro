@@ -9,7 +9,8 @@ import {
   getPrediction,
   PredictionType,
   WalletType,
-  getWallet
+  getWallet,
+  calcBalance
 } from '.'
 
 import * as chain from '../chain'
@@ -45,6 +46,8 @@ export class PredictionContract extends portfolio.PortfolioContract {
       value,
       wallet: fullWallet
     })
+
+    console.log('summary', summary)
 
     // TODO: return portfolio type instead of BooleanPrediction
     this.table.portfolio[wallet.id] = summary.prediction
@@ -83,7 +86,7 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     // console.log('buy', amount, fullWallet)
 
-    this.table.balance[wallet.id] =+ amount
+    this.table.balance[wallet.id] = calcBalance(amount, fullWallet)
 
     return this
   }

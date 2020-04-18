@@ -1,13 +1,13 @@
 import {
   WalletType,
   WalletPortfolioType,
-  TableType
+  TableType,
+  WalletReserveType
 } from '.'
 
 import * as chain from '../chain'
 
 import * as contract from '../contract'
-import { WalletReserveType } from './types';
 
 export const getPortfolio = (state: contract.ContractStateType): TableType['portfolio'] => {
   return state.table.portfolio
