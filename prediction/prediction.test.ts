@@ -214,6 +214,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(800)
       })
 
+      // TODO: add additional version to utils.test
       it('can equalise an unequal prediction', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -265,6 +266,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(900)
       })
 
+      // TODO: add additional version to utils.test
       it('can unequalise a prediction', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -316,6 +318,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(800)
       })
 
+      // TODO: add additional version to utils.test
       it('can reverse a prediction', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -367,6 +370,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(900)
       })
 
+      // TODO: add additional version to utils.test
       it('can expand a prediction', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -418,6 +422,7 @@ context('Prediction', () => {
           expect(wallet.cole.assets.liborodollar).to.equal(900)
       })
 
+      // TODO: add additional version to utils.test
       it('can shrink a prediction', () => {
         const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
