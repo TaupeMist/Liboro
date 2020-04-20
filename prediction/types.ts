@@ -2,7 +2,13 @@ import * as chain from '../chain'
 
 import * as portfolio from '../portfolio'
 
+import * as contract from '../contract'
+
 export type TokenType = 'yes' | 'no'
+
+export type AssetType = contract.AssetType & {
+  id: TokenType | chain.AssetType
+}
 
 export type ConfigureParams = {
   asset: chain.AssetHardType,
@@ -15,6 +21,7 @@ export type CreditType = {
 
 export type WalletType = portfolio.WalletType & {
   credit: CreditType,
+  creditBuyable: number,
   balance: {
     [A in chain.AssetHardType | TokenType]?: number
   },

@@ -1,7 +1,5 @@
 import {
-  PredictionSummary,
   ConfigureParams,
-  getPredictionSummaryParams,
   calcGlobalPortfolio,
   getPredictionSummary,
   TokenType,
@@ -10,8 +8,12 @@ import {
   PredictionType,
   WalletType,
   getWallet,
-  calcBalance
+  calcBalance,
 } from '.'
+
+import {
+  format
+} from '../contract'
 
 import * as chain from '../chain'
 
@@ -61,6 +63,19 @@ export class PredictionContract extends portfolio.PortfolioContract {
   private mint(amount: number, asset: TokenType, wallet: chain.WalletType): this {
     this.updateTable({ wallet })
 
+    const payable = {
+      ...this.getAsset(asset),
+      id: asset,
+      value: amount
+    }
+
+    const currTokenBalance = this.table.balance[wallet.id][payable.id]
+
+    this.table.balance[wallet.id][payable.id] = format(currTokenBalance + payable.value)
+
+    // TODO: move calc to utils
+    this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
+
     return this
   }
 
@@ -79,7 +94,21 @@ export class PredictionContract extends portfolio.PortfolioContract {
     // TODO: instead of simply increasing the balance,
     // TODO: consider any credit that the user may have,
     // TODO: then calculate the amount of new tokens to be minted
-    this.table.balance[wallet.id] = calcBalance(amount, fullWallet)
+
+    const nextBalance = calcBalance(amount, fullWallet)
+
+    const amountToMint: WalletType['balance'] = {
+      yes: nextBalance.yes - fullWallet.balance.yes,
+      no: nextBalance.no - fullWallet.balance.no
+    }
+
+    if (amountToMint.yes > 0) {
+      this.mint(amountToMint.yes, 'yes', wallet)
+    }
+
+    if (amountToMint.no > 0) {
+      this.mint(amountToMint.no, 'no', wallet)
+    }
 
     return this
   }
