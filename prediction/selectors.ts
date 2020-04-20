@@ -2,7 +2,8 @@ import {
   PredictionType,
   WalletType,
   CreditType,
-  getTotal
+  getTotal,
+  getCreditBuyable
 } from '.';
 
 import * as chain from '../chain'
@@ -37,10 +38,12 @@ export const getWallet = (state: contract.ContractStateType) => (wallet: chain.W
   const credit = getCredit(state)(wallet)
   const balance = getBalance(state)(portfolioWallet)
   const total = getTotal(credit, balance)
+  const creditBuyable = getCreditBuyable(credit, getPrediction(state)(wallet))
 
   return {
     ...portfolioWallet,
     credit,
+    creditBuyable,
     balance,
     total
   }

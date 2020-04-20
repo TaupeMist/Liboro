@@ -5,7 +5,8 @@ import {
   BooleanPrediction,
   WalletType,
   TokenType,
-  TableType
+  TableType,
+  CreditType
 } from '.';
 
 import {
@@ -179,5 +180,55 @@ export const calcBalance = (amount: number, wallet: WalletType): TableType['Bala
   return {
     yes: format(wallet.balance.yes + (amount * (wallet.portfolio.yes / 100))),
     no: format(wallet.balance.no + (amount * (wallet.portfolio.no / 100)))
+  }
+}
+
+export const getCreditBuyable = (credit: CreditType, prediction: PredictionType): CreditType => {
+  const creditBuyable: CreditType = {}
+
+  if (credit.yes) {
+    creditBuyable.yes = format((prediction.no / prediction.yes) * credit.yes)
+  } else if (credit.no) {
+    creditBuyable.no = format((prediction.yes / prediction.no) * credit.no)
+  }
+
+  return creditBuyable
+}
+
+export const calcMintable = (amount: number, { creditBuyable }: WalletType): TableType['Balance'] => {
+  if (!creditBuyable.yes && !creditBuyable.no) return 0
+
+  const result = amount - (creditBuyable.yes || creditBuyable.no)
+
+  return result > 0 ? format(result) : 0
+}
+
+export const getCreditBuybackSummary = (amount: number, wallet: WalletType) => {
+  const mintable = calcMintable(amount, wallet)
+
+  const buyable = format(amount - mintable)
+
+  const payable = amount > buyable ? buyable : amount
+
+  const prediction = wallet.portfolio
+
+  const nextBalance = { ...wallet.balance }
+  const nextCredit = { ...wallet.credit }
+
+  if (wallet.creditBuyable.yes > 0) {
+    nextBalance.yes += format(payable * (prediction.yes / prediction.no))
+    nextBalance.no += payable
+
+    nextCredit.yes -= payable
+  } else if (wallet.creditBuyable.no > 0) {
+    nextBalance.yes += payable
+    nextBalance.no += format(payable * (prediction.no / prediction.yes))
+
+    nextCredit.no -= payable
+  }
+
+  return {
+    nextBalance,
+    nextCredit
   }
 }

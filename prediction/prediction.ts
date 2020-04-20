@@ -9,6 +9,8 @@ import {
   WalletType,
   getWallet,
   calcBalance,
+  calcMintable,
+  getCreditBuybackSummary
 } from '.'
 
 import {
@@ -94,6 +96,18 @@ export class PredictionContract extends portfolio.PortfolioContract {
     // TODO: instead of simply increasing the balance,
     // TODO: consider any credit that the user may have,
     // TODO: then calculate the amount of new tokens to be minted
+
+    // CREDIT BUYBACK
+
+    // const creditBuybackSummary = getCreditBuybackSummary(amount, fullWallet)
+
+    // this.table.balance[wallet.id] = creditBuybackSummary.nextBalance
+    // this.table.credit[wallet.id] = creditBuybackSummary.nextCredit
+
+    // MINTING
+
+    // const mintable = calcMintable(amount, fullWallet)
+    // const nextBalance = calcBalance(amount - mintable, fullWallet)
 
     const nextBalance = calcBalance(amount, fullWallet)
 

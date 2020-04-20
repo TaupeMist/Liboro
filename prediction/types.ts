@@ -21,7 +21,7 @@ export type CreditType = {
 
 export type WalletType = portfolio.WalletType & {
   credit: CreditType,
-  creditBuyable: number,
+  creditBuyable: CreditType,
   balance: {
     [A in chain.AssetHardType | TokenType]?: number
   },
