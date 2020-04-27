@@ -6,7 +6,8 @@ import {
   WalletType,
   TokenType,
   TableType,
-  CreditType
+  CreditType,
+  CreditBuybackSummary
 } from '.';
 
 import {
@@ -195,7 +196,7 @@ export const getCreditBuyable = (credit: CreditType, prediction: PredictionType)
   return creditBuyable
 }
 
-export const calcMintable = (amount: number, { creditBuyable }: WalletType): TableType['Balance'] => {
+export const calcRemainder = (amount: number, { creditBuyable }: WalletType): number => {
   if (!creditBuyable.yes && !creditBuyable.no) return amount
 
   const result = amount - (creditBuyable.yes || creditBuyable.no)
@@ -203,37 +204,43 @@ export const calcMintable = (amount: number, { creditBuyable }: WalletType): Tab
   return result > 0 ? format(result) : 0
 }
 
-export const getCreditBuybackSummary = (amount: number, wallet: WalletType) => {
-  const mintable = calcMintable(amount, wallet)
+export const getCreditBuybackSummary = (amount: number, wallet: WalletType): CreditBuybackSummary => {
+  const remainder = calcRemainder(amount, wallet)
 
-  const buyable = format(amount - mintable)
+  const buyable = format(amount - remainder)
 
-  const payable = amount > buyable ? buyable : amount
+  const mintable: CreditBuybackSummary['mintable'] = {
+    id: wallet.creditBuyable.yes > 0 ? 'no' : 'yes',
+    value: amount > buyable ? buyable : amount
+  }
 
   const prediction = wallet.portfolio
 
   const nextBalance = { ...wallet.balance }
   const nextCredit = { ...wallet.credit }
 
-  if (wallet.creditBuyable.yes > 0) {
-    const buyback = format(prediction.yes / prediction.no * payable)
+  if (mintable.id === 'no') {
+    const buyback = format(prediction.yes / prediction.no * mintable.value)
 
     nextBalance.yes = format(nextBalance.yes + buyback)
-    nextBalance.no = format(nextBalance.no + payable)
+    nextBalance.no = format(nextBalance.no + mintable.value)
 
     nextCredit.yes = format(nextCredit.yes - buyback)
-  } else if (wallet.creditBuyable.no > 0) {
-    const buyback = format(prediction.no / prediction.yes * payable)
+    if (nextCredit.yes === 0) delete nextCredit.yes
+  } else if (mintable.id === 'yes') {
+    const buyback = format(prediction.no / prediction.yes * mintable.value)
 
-    nextBalance.yes = format(nextBalance.yes + payable)
+    nextBalance.yes = format(nextBalance.yes + mintable.value)
     nextBalance.no = format(nextBalance.no + buyback)
 
     nextCredit.no = format(nextCredit.no - buyback)
+    if (nextCredit.no === 0) delete nextCredit.no
   }
 
   return {
+    remainder,
     nextBalance,
     nextCredit,
-    mintable
+    mintable: mintable.value > 0 ? mintable : null,
   }
 }

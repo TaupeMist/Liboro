@@ -57,3 +57,15 @@ export type TableType = portfolio.TableType & {
     [K: string]: CreditType
   }
 }
+
+export type CreditBuybackSummary = {
+  remainder: number,
+  mintable?: {
+    id: TokenType,
+    value: number
+  },
+  nextBalance: {
+    [A in chain.AssetHardType | TokenType]?: number
+  },
+  nextCredit: CreditType
+}

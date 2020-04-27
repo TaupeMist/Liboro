@@ -9,7 +9,6 @@ import {
   WalletType,
   getWallet,
   calcBalance,
-  calcMintable,
   getCreditBuybackSummary
 } from '.'
 
@@ -93,30 +92,50 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     const fullWallet = this.getWallet(wallet)
 
-    // CREDIT BUYBACK
+    try {
+      /**
+       * CREDIT BUYBACK
+       *
+       * Buy back credit (previously minted tokens) though minting the opposite token
+       */
+      const { mintable, remainder, ...creditBuyback } = getCreditBuybackSummary(amount, fullWallet)
 
-    const creditBuyback = getCreditBuybackSummary(amount, fullWallet)
+      /**
+       * If this user has existing credit, that credit can be reclaimed through minting
+       */
+      if (mintable) {
+        this.mint(mintable.value, mintable.id, wallet)
 
-    this.table.balance[wallet.id] = creditBuyback.nextBalance
-    this.table.credit[wallet.id] = creditBuyback.nextCredit
+        this.table.balance[wallet.id] = creditBuyback.nextBalance
+        this.table.credit[wallet.id] = creditBuyback.nextCredit
 
-    if (creditBuyback.mintable === 0) return this
+        /**
+         * If the credit buyback used the entire buying amount, then the purchase is complete
+         */
+        if (remainder === 0) return this
+      }
 
-    // MINTING
+      /**
+       * MINTING
+       *
+       * Once any credit has been bought back, mint any remaining amount
+       */
+      const nextBalance = calcBalance(remainder, fullWallet)
 
-    const nextBalance = calcBalance(creditBuyback.mintable, fullWallet)
+      const amountToMint: WalletType['balance'] = {
+        yes: nextBalance.yes - fullWallet.balance.yes,
+        no: nextBalance.no - fullWallet.balance.no
+      }
 
-    const amountToMint: WalletType['balance'] = {
-      yes: nextBalance.yes - fullWallet.balance.yes,
-      no: nextBalance.no - fullWallet.balance.no
-    }
+      if (amountToMint.yes > 0) {
+        this.mint(amountToMint.yes, 'yes', wallet)
+      }
 
-    if (amountToMint.yes > 0) {
-      this.mint(amountToMint.yes, 'yes', wallet)
-    }
-
-    if (amountToMint.no > 0) {
-      this.mint(amountToMint.no, 'no', wallet)
+      if (amountToMint.no > 0) {
+        this.mint(amountToMint.no, 'no', wallet)
+      }
+    } catch(ex) {
+      throw ex
     }
 
     return this
@@ -144,6 +163,9 @@ export class PredictionContract extends portfolio.PortfolioContract {
        */
       this.transfer(amount, this.baseAsset.id, wallet, this.table.owner)
 
+      /**
+       * Once transfer has completed, buy the yes/no tokens
+       */
       this.buy(amount, wallet)
     } catch(ex) {
       throw ex
