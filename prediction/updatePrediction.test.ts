@@ -8,7 +8,7 @@ import {
 } from '.'
 
 context('Prediction', () => {
-  describe('updatePrediction', () => {
+  describe('update', () => {
     it('can update with no balance', () => {
       const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
@@ -422,6 +422,23 @@ context('Prediction', () => {
         .updatePrediction(60, cole)
 
         const { predict } = chain.getState().contract
+
+        expect(predict.table.asset.no).to.deep.equal({
+          id: 'no',
+          value: 0,
+          marketCap: 20
+        })
+
+        expect(predict.table.asset.yes).to.deep.equal({
+          id: 'yes',
+          value: 0,
+          marketCap: 80
+        })
+
+        expect(predict.table.portfolio.global).to.deep.equal({
+          no: 40,
+          yes: 60
+        })
 
         expect(predict.table.portfolio.cole).to.deep.equal({
           no: 40,

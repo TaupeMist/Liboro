@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import { createPrediction } from './utils';
 
 context('Prediction', () => {
-  describe('createPrediction', () => {
+  describe('create', () => {
     it('should throw when value is less than 100', () => {
       const getPredictionWithInvalidValue = () => {
         return createPrediction(0)

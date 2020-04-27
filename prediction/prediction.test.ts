@@ -74,39 +74,6 @@ context('Prediction', () => {
       })
     })
 
-    it('can buy', () => {
-      const chain = Chain({ initialState: { wallet: {}, contract: {} } })
-
-      const taupemist: WalletType = {
-        id: 'taupemist',
-        assets: {}
-      }
-
-      chain.execute(addWallet(taupemist))
-
-      const cole: WalletType = {
-        id: 'cole',
-        assets: {
-          liborodollar: 1000
-        }
-      }
-
-      chain.execute(addWallet(cole))
-
-      new PredictionContract('predict')
-        .deploy(chain)
-        .configure({
-          asset: 'liborodollar',
-          wallet: taupemist
-        })
-        .deposit(50, cole)
-
-      const { wallet } = chain.getState()
-
-      expect(wallet.taupemist.assets.liborodollar).to.equal(50)
-      expect(wallet.cole.assets.liborodollar).to.equal(950)
-    })
-
     it('get prediction summary', () => {})
   })
 })

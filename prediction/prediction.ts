@@ -93,23 +93,18 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     const fullWallet = this.getWallet(wallet)
 
-    // TODO: instead of simply increasing the balance,
-    // TODO: consider any credit that the user may have,
-    // TODO: then calculate the amount of new tokens to be minted
-
     // CREDIT BUYBACK
 
-    // const creditBuybackSummary = getCreditBuybackSummary(amount, fullWallet)
+    const creditBuyback = getCreditBuybackSummary(amount, fullWallet)
 
-    // this.table.balance[wallet.id] = creditBuybackSummary.nextBalance
-    // this.table.credit[wallet.id] = creditBuybackSummary.nextCredit
+    this.table.balance[wallet.id] = creditBuyback.nextBalance
+    this.table.credit[wallet.id] = creditBuyback.nextCredit
+
+    if (creditBuyback.mintable === 0) return this
 
     // MINTING
 
-    // const mintable = calcMintable(amount, fullWallet)
-    // const nextBalance = calcBalance(amount - mintable, fullWallet)
-
-    const nextBalance = calcBalance(amount, fullWallet)
+    const nextBalance = calcBalance(creditBuyback.mintable, fullWallet)
 
     const amountToMint: WalletType['balance'] = {
       yes: nextBalance.yes - fullWallet.balance.yes,

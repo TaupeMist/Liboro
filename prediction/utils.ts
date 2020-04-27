@@ -196,7 +196,7 @@ export const getCreditBuyable = (credit: CreditType, prediction: PredictionType)
 }
 
 export const calcMintable = (amount: number, { creditBuyable }: WalletType): TableType['Balance'] => {
-  if (!creditBuyable.yes && !creditBuyable.no) return 0
+  if (!creditBuyable.yes && !creditBuyable.no) return amount
 
   const result = amount - (creditBuyable.yes || creditBuyable.no)
 
@@ -216,19 +216,24 @@ export const getCreditBuybackSummary = (amount: number, wallet: WalletType) => {
   const nextCredit = { ...wallet.credit }
 
   if (wallet.creditBuyable.yes > 0) {
-    nextBalance.yes += format(payable * (prediction.yes / prediction.no))
-    nextBalance.no += payable
+    const buyback = format(prediction.yes / prediction.no * payable)
 
-    nextCredit.yes -= payable
+    nextBalance.yes = format(nextBalance.yes + buyback)
+    nextBalance.no = format(nextBalance.no + payable)
+
+    nextCredit.yes = format(nextCredit.yes - buyback)
   } else if (wallet.creditBuyable.no > 0) {
-    nextBalance.yes += payable
-    nextBalance.no += format(payable * (prediction.no / prediction.yes))
+    const buyback = format(prediction.no / prediction.yes * payable)
 
-    nextCredit.no -= payable
+    nextBalance.yes = format(nextBalance.yes + payable)
+    nextBalance.no = format(nextBalance.no + buyback)
+
+    nextCredit.no = format(nextCredit.no - buyback)
   }
 
   return {
     nextBalance,
-    nextCredit
+    nextCredit,
+    mintable
   }
 }
