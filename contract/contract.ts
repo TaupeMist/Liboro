@@ -10,19 +10,15 @@ import {
   AssetType,
   IContract,
   ContractStateType,
-  ConfigureParams
-} from './types'
-
-import {
+  ConfigureParams,
   addAsset,
   setTable,
-  transfer
-} from './commands'
-
-import {
+  deposit,
+  withdraw,
+  transfer,
   getWallet,
   getAsset
-} from './selectors'
+} from '.'
 
 export class Contract implements IContract {
   protected chain?: chain.StoreType
@@ -137,12 +133,32 @@ export class Contract implements IContract {
     return this.addAsset(token)
   }
 
+  public deposit (
+    amount: number,
+    asset: chain.AssetType,
+    sender: chain.WalletType
+  ): this {
+    this.chain.execute(deposit(amount, asset, sender, this.id))
+
+    return this
+  }
+
+  public withdraw (
+    amount: number,
+    asset: chain.AssetType,
+    receiver: chain.WalletType
+  ): this {
+    this.chain.execute(withdraw(amount, asset, receiver, this.id))
+
+    return this
+  }
+
   public transfer (
     amount: number,
     asset: chain.AssetType,
     sender: chain.WalletType,
     receiver: chain.WalletType
-  ) {
+  ): this {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this

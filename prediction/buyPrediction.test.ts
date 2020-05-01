@@ -34,7 +34,7 @@ context('Prediction', () => {
           asset: 'liborodollar',
           wallet: taupemist
         })
-        .deposit(50, cole)
+        .deposit(50, 'liborodollar', cole)
 
       const { predict } = chain.getState().contract
 
@@ -82,9 +82,9 @@ context('Prediction', () => {
           wallet: taupemist
         })
         .updatePrediction(80, cole)
-        .deposit(100, cole)
+        .deposit(100, 'liborodollar', cole)
         .updatePrediction(60, cole)
-        .deposit(33.3333, cole)
+        .deposit(33.3333, 'liborodollar', cole)
 
         const { predict } = chain.getState().contract
 
@@ -134,9 +134,9 @@ context('Prediction', () => {
           wallet: taupemist
         })
         .updatePrediction(80, cole)
-        .deposit(100, cole)
+        .deposit(100, 'liborodollar', cole)
         .updatePrediction(60, cole)
-        .deposit(16.6666, cole)
+        .deposit(16.6666, 'liborodollar', cole)
 
         const { predict } = chain.getState().contract
 
@@ -188,9 +188,9 @@ context('Prediction', () => {
           wallet: taupemist
         })
         .updatePrediction(80, cole)
-        .deposit(100, cole)
+        .deposit(100, 'liborodollar', cole)
         .updatePrediction(60, cole)
-        .deposit(133.3333, cole)
+        .deposit(133.3333, 'liborodollar', cole)
 
         const { predict } = chain.getState().contract
 

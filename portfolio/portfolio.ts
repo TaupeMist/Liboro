@@ -5,7 +5,6 @@ import {
   GetPorfolioType,
   ConfigureParams,
   WalletType,
-  seed,
   getWallet
 } from '.'
 
@@ -13,7 +12,8 @@ import * as chain from '../chain'
 
 import {
   Contract,
-  getWalletId
+  getWalletId,
+  deposit
 } from '../contract'
 
 export class PortfolioContract extends Contract {
@@ -99,7 +99,7 @@ export class PortfolioContract extends Contract {
 
     this.addAsset(asset, wallet)
 
-    this.chain.execute(seed(amount, asset, wallet, this.id))
+    this.chain.execute(deposit(amount, asset, wallet, this.id))
 
     if (this.isPortfolioEmpty(this.table.portfolio.global)) {
       this.table.portfolio.global = {

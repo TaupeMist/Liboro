@@ -14,7 +14,8 @@ import {
 } from '.'
 
 import {
-  format
+  format,
+  deposit
 } from '../contract'
 
 import * as chain from '../chain'
@@ -43,7 +44,7 @@ export class PredictionContract extends portfolio.PortfolioContract {
   public get balance() {
     this.updateTable()
 
-    return this.table.owner.assets[this.baseAsset.id]
+    return this.getAsset(this.baseAsset.id).value
   }
 
   public getWallet = (wallet: chain.WalletType): WalletType => {
@@ -172,27 +173,34 @@ export class PredictionContract extends portfolio.PortfolioContract {
    * and buy an amount of yes/no tokens proportionate to their current prediction
    *
    * @param amount the amount in base asset that will be used to buy tokens
+   * @param asset the wallet of the buyer
    * @param wallet the wallet of the buyer
    */
-  public deposit(amount: number, wallet: chain.WalletType): this {
-    this.updateTable({ wallet })
+  public deposit(
+    amount: number,
+    asset: chain.AssetType,
+    buyer: chain.WalletType
+  ): this {
+    if (asset !== this.baseAsset.id) throw new Error('Cannot deposit. Asset type must match base asset')
+
+    this.updateTable({ wallet: buyer })
 
     /**
      * If user does not have a prediction, set a default prediction
      */
-    if (!this.hasPrediction(wallet))
-      this.updatePrediction(50, wallet)
+    if (!this.hasPrediction(buyer))
+      this.updatePrediction(50, buyer)
 
     try {
       /**
        * Transfer must complete before tokens can be bought
        */
-      this.transfer(amount, this.baseAsset.id, wallet, this.table.owner)
+      super.deposit(amount, asset, buyer)
 
       /**
        * Once transfer has completed, buy the yes/no tokens
        */
-      this.buy(amount, wallet)
+      this.buy(amount, buyer)
     } catch(ex) {
       throw ex
     }
@@ -207,12 +215,12 @@ export class PredictionContract extends portfolio.PortfolioContract {
       wallets: this.portfolioWallets.map(this.getWallet)
     })
 
-    const transferPayable = wallet => {
-      this.transfer(wallet.payable.value, this.baseAsset.id, this.table.owner, wallet)
+    const withdrawPayable = wallet => {
+      this.withdraw(wallet.payable.value, this.baseAsset.id, wallet)
     }
 
     try {
-      wallets.forEach(transferPayable)
+      wallets.forEach(withdrawPayable)
 
       this.resolved = true
       this.active = false
@@ -247,7 +255,7 @@ export class PredictionContract extends portfolio.PortfolioContract {
     const { wallet } = params
 
     if (wallet && !this.table.owner)
-      this.table.owner = wallet
+      this.table.owner = wallet.id
 
     if (wallet && !this.table.balance[wallet.id])
       this.table.balance[wallet.id] = 0

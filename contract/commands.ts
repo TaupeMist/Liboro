@@ -46,19 +46,19 @@ export const addAsset = (asset: AssetType, target: Contract): CommandType => {
   }
 }
 
-export const seed = (
+export const deposit = (
   amount: number,
-  assetSeeding: AssetHardType,
-  buyer: WalletType,
+  asset: AssetType,
+  sender: WalletType,
   contractId: string
 ): CommandType => {
   const execute: ExecuteType = state => {
     const { contract, wallet } = state;
-    const assets = wallet[buyer.id].assets
+    const assets = wallet[sender.id].assets
 
-    wallet[buyer.id].assets[assetSeeding] = format(assets[assetSeeding] - amount)
+    wallet[sender.id].assets[asset] = format(assets[asset] - amount)
 
-    contract[contractId].assets[assetSeeding] = amount
+    contract[contractId].assets[asset] = format((contract[contractId].assets[asset] || 0) + amount)
 
     return { ...state, contract }
   }
@@ -67,7 +67,39 @@ export const seed = (
     const { contract } = state;
     const { baseToken } = getTable(state, contractId)
 
-    contract[contractId].assets[assetSeeding] = 0
+    contract[contractId].assets[asset] = 0
+    contract[contractId].assets[baseToken.id] = 0
+
+    return { ...state, contract }
+  }
+
+  return {
+    execute,
+    undo
+  }
+}
+
+export const withdraw = (
+  amount: number,
+  asset: AssetType,
+  receiver: WalletType,
+  contractId: string
+): CommandType => {
+  const execute: ExecuteType = state => {
+    const { contract, wallet } = state;
+
+    contract[contractId].assets[asset] = format(contract[contractId].assets[asset] - amount)
+
+    wallet[receiver.id].assets[asset] = format((wallet[receiver.id].assets[asset] || 0) + amount)
+
+    return { ...state, contract }
+  }
+
+  const undo: UndoType = state => {
+    const { contract } = state;
+    const { baseToken } = getTable(state, contractId)
+
+    contract[contractId].assets[asset] = 0
     contract[contractId].assets[baseToken.id] = 0
 
     return { ...state, contract }
