@@ -19,6 +19,21 @@ import {
 export class PortfolioContract extends Contract {
   public constructor(readonly id: string) { super(id) }
 
+  public get portfolioWallets() {
+    this.updateTable()
+
+    const outGlobal = key => key !== 'global'
+
+    const outEmptyPortfolios = walletId => !this.isPortfolioEmpty(this.table.portfolio[walletId])
+
+    const toWallet = id => this.getWallet({ id } as WalletType)
+
+    return Object.keys(this.table.portfolio)
+      .filter(outGlobal)
+      .filter(outEmptyPortfolios)
+      .map(toWallet)
+  }
+
   public getWallet = (wallet: chain.WalletType): WalletType => {
     return getWallet(this.getState())(wallet)
   }
@@ -111,7 +126,7 @@ export class PortfolioContract extends Contract {
   protected updateTable(config: {
     wallet?: chain.WalletType,
     asset?: chain.AssetType
-  }) {
+  } = {}) {
     super.updateTable(config)
 
     if (!this.table.portfolio)

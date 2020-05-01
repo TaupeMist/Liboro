@@ -9,7 +9,8 @@ import {
   WalletType,
   getWallet,
   calcBalance,
-  getCreditBuybackSummary
+  getCreditBuybackSummary,
+  getResolutionSummary
 } from '.'
 
 import {
@@ -22,6 +23,28 @@ import * as portfolio from '../portfolio'
 
 export class PredictionContract extends portfolio.PortfolioContract {
   public constructor(readonly id: string) { super(id) }
+
+  public set active(active: boolean) {
+    this.table.active = active
+  }
+
+  public get active() {
+    return this.table.active
+  }
+
+  public set resolved(resolved: boolean) {
+    this.table.resolved = resolved
+  }
+
+  public get resolved() {
+    return this.table.resolved
+  }
+
+  public get balance() {
+    this.updateTable()
+
+    return this.table.owner.assets[this.baseAsset.id]
+  }
 
   public getWallet = (wallet: chain.WalletType): WalletType => {
     return getWallet(this.getState())(wallet)
@@ -36,6 +59,9 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     this.addAsset('yes', wallet)
     this.addAsset('no', wallet)
+
+    this.resolved = false
+    this.active = true
 
     return this
   }
@@ -75,7 +101,7 @@ export class PredictionContract extends portfolio.PortfolioContract {
     this.table.balance[wallet.id][payable.id] = format(currTokenBalance + payable.value)
 
     // TODO: move calc to utils
-    this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap + amount)
+    this.table.asset[asset].marketCap = format(this.getAsset(asset).marketCap + amount)
 
     return this
   }
@@ -174,11 +200,42 @@ export class PredictionContract extends portfolio.PortfolioContract {
     return this
   }
 
+  public resolve(assetType: TokenType): this {
+    const { wallets } = getResolutionSummary({
+      asset: this.getAsset(assetType),
+      balance: this.balance,
+      wallets: this.portfolioWallets.map(this.getWallet)
+    })
+
+    const transferPayable = wallet => {
+      this.transfer(wallet.payable.value, this.baseAsset.id, this.table.owner, wallet)
+    }
+
+    try {
+      wallets.forEach(transferPayable)
+
+      this.resolved = true
+      this.active = false
+    } catch(ex) {
+      throw ex
+    }
+
+    return this
+  }
+
+  public hasPrediction(wallet: chain.WalletType): Boolean {
+    return hasPrediction(this.getState())(wallet)
+  }
+
+  public getPrediction(wallet: chain.WalletType): PredictionType {
+    return getPrediction(this.getState())(wallet)
+  }
+
   // TODO: rename and clarify usage
   protected updateTable(params: {
     wallet?: chain.WalletType,
     asset?: chain.AssetType
-  }) {
+  } = {}) {
     super.updateTable(params)
 
     if (!this.table.balance)
@@ -197,14 +254,6 @@ export class PredictionContract extends portfolio.PortfolioContract {
 
     if (wallet && !this.table.credit[wallet.id])
       this.table.credit[wallet.id] = {}
-  }
-
-  public hasPrediction(wallet: chain.WalletType): Boolean {
-    return hasPrediction(this.getState())(wallet)
-  }
-
-  public getPrediction(wallet: chain.WalletType): PredictionType {
-    return getPrediction(this.getState())(wallet)
   }
 }
 

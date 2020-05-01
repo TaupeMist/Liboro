@@ -52,4 +52,6 @@ context('Prediction', () => {
       })
     })
   })
+
+  describe('prediction summary', () => {})
 })

@@ -30,7 +30,7 @@ export type WalletType = portfolio.WalletType & {
   }
 }
 
-export type getPredictionSummaryParams = {
+export type GetPredictionSummaryParams = {
   value: number,
   wallet: WalletType
 }
@@ -68,4 +68,19 @@ export type CreditBuybackSummary = {
     [A in chain.AssetHardType | TokenType]?: number
   },
   nextCredit: CreditType
+}
+
+export type getResolutionSummaryParams = {
+  asset: AssetType
+  balance: number,
+  wallets: WalletType[]
+}
+
+export type WalletPayableType = WalletType & {
+  payable: AssetType
+}
+
+export type ResolutionSummary = {
+  value: number,
+  wallets: WalletPayableType[]
 }

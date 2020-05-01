@@ -1,13 +1,17 @@
 import {
   PredictionType,
   PredictionSummary,
-  getPredictionSummaryParams,
+  GetPredictionSummaryParams,
   BooleanPrediction,
   WalletType,
   TokenType,
   TableType,
   CreditType,
-  CreditBuybackSummary
+  CreditBuybackSummary,
+  AssetType,
+  WalletPayableType,
+  getResolutionSummaryParams,
+  ResolutionSummary
 } from '.';
 
 import {
@@ -67,7 +71,7 @@ export const getHighestPrediction = (value: number): TokenType | null => {
 export const getPredictionSummary = ({
   value,
   wallet
-}: getPredictionSummaryParams): PredictionSummary => {
+}: GetPredictionSummaryParams): PredictionSummary => {
   const prediction = createPrediction(value)
 
   const nextBalance = {} as PredictionSummary['nextBalance']
@@ -242,5 +246,38 @@ export const getCreditBuybackSummary = (amount: number, wallet: WalletType): Cre
     nextBalance,
     nextCredit,
     mintable: mintable.value > 0 ? mintable : null,
+  }
+}
+
+export const getAssetValue = (balance: number, marketCap: number): number => {
+  return format(balance / marketCap)
+}
+
+const getWalletPayable = (wallet: WalletType, asset: AssetType, value: number): WalletPayableType => {
+  const payableValue = format(wallet.total[asset.id] * value)
+
+  const payable = {
+    ...asset,
+    value: payableValue
+  }
+
+  return {
+    ...wallet,
+    payable
+  }
+}
+
+export const getResolutionSummary = ({
+  asset,
+  balance,
+  wallets
+}: getResolutionSummaryParams): ResolutionSummary => {
+  const value = getAssetValue(balance, asset.marketCap)
+  const intoWalletPayable = wallet => getWalletPayable(wallet, asset, value)
+  const walletsPayable = wallets.map(intoWalletPayable)
+
+  return {
+    value,
+    wallets: walletsPayable
   }
 }
