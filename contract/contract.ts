@@ -25,28 +25,29 @@ export class Contract implements IContract {
 
   public constructor(readonly id: string) {}
 
+  protected requiresContract(id: string, chain: chain.StoreType = this.chain) {
+    if (!chain) throw new Error('Chain not found. Please ensure that the contract has been deployed.')
+
+    if (!chain.getState().contract[id])
+      throw new Error(`No contract with the id "${id}" was found. Please ensure that the contract has been deployed.`)
+  }
+
   public get assets(): ContractStateType['assets'] {
-    try {
-      return this.chain.getState().contract[this.id].assets
-    } catch (ex) {
-      throw new Error('Contract not found. Please ensure that the contract has been deployed.')
-    }
+    this.requiresContract(this.id)
+
+    return this.chain.getState().contract[this.id].assets
   }
 
   public get table(): TableType {
-    try {
-      return this.chain.getState().contract[this.id].table
-    } catch (ex) {
-      throw new Error('Contract not found. Please ensure that the contract has been deployed.')
-    }
+    this.requiresContract(this.id)
+
+    return this.chain.getState().contract[this.id].table
   }
 
   public set table(table: TableType) {
-    try {
-      this.chain.execute(setTable(table, this))
-    } catch (ex) {
-      throw new Error('Contract not found. Please ensure that the contract has been deployed.')
-    }
+    this.requiresContract(this.id)
+
+    this.chain.execute(setTable(table, this))
   }
 
   public get baseToken() {
@@ -76,6 +77,8 @@ export class Contract implements IContract {
     return getAsset(this.getState())(asset, prevAsset)
   }
 
+  // TODO: add string[] param here in order to specify dependent contracts to ensure that those contracts have been
+  // TODO: deployed to the chain and exist
   public deploy(chain: chain.StoreType): this {
     if (this.chain) throw new Error('Chain already exists. Cannot override chain.')
 

@@ -22,6 +22,9 @@ describe('Contract', () => {
     expect(chain.getState().contract.liboro).to.exist
   })
 
+  // TODO: add more deploy tests that cover the provision of dependent contracts and
+  // TODO: test exception handling when dependent contracts do not exist
+
   it('can configure', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 

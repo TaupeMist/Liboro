@@ -14,8 +14,7 @@ import {
 } from '.'
 
 import {
-  format,
-  deposit
+  format
 } from '../contract'
 
 import * as chain from '../chain'
