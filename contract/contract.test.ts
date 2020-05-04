@@ -5,7 +5,20 @@ import { Chain } from '../chain'
 
 import {
   Contract
-} from './contract'
+} from '.'
+
+export class DependencyContract extends Contract {
+  public constructor(readonly id: string) {
+    super(id)
+
+    this.type = 'SenseContract'
+    this.version = 1
+    this.dependencies.content = {
+      type: 'ContentContract',
+      version: 1
+    }
+  }
+}
 
 describe('Contract', () => {
   it('can init', () => {
@@ -22,8 +35,41 @@ describe('Contract', () => {
     expect(chain.getState().contract.liboro).to.exist
   })
 
-  // TODO: add more deploy tests that cover the provision of dependent contracts and
-  // TODO: test exception handling when dependent contracts do not exist
+  it('should throw if dependent contract does not exist', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const withoutDependentConract = () => {
+      new DependencyContract('sense')
+      .deploy(chain, {
+        content: 'content'
+      })
+      .configure({
+        asset: 'liboropoints'
+      })
+    }
+
+    expect(withoutDependentConract).to.throw('Could not deploy contract. Error: No contract with the id "content" was found. Please ensure that the contract has been deployed.');
+  })
+
+  it('should throw if dependent contract mapping does not exist', () => {
+    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+    const withoutDependentConractMapping = () => {
+      new Contract('contract')
+        .deploy(chain)
+        .configure({
+          asset: 'liboropoints'
+        })
+
+      new DependencyContract('dependency')
+      .deploy(chain)
+      .configure({
+        asset: 'liboropoints'
+      })
+    }
+
+    expect(withoutDependentConractMapping).to.throw('Could not deploy contract. Error: Dependency mismatch. Expected dependency "content" to be defined in {}');
+  })
 
   it('can configure', () => {
     const chain = Chain({ initialState: { wallet: {}, contract: {} } })

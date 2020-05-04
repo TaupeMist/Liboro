@@ -17,7 +17,12 @@ import {
 } from '../contract'
 
 export class PortfolioContract extends Contract {
-  public constructor(readonly id: string) { super(id) }
+  public constructor(readonly id: string) {
+    super(id)
+
+    this.type = 'PortfolioContract'
+    this.version = 1
+  }
 
   public get portfolioWallets() {
     this.updateTable()

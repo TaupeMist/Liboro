@@ -30,7 +30,28 @@ export type ContractStateType = {
   table: TableType
 }
 
+export type ContractType = 'Contract' | 'CoreContract' | 'ContentContract' | 'ForgeContract' | 'PortfolioContract' | 'PredictionContract' | 'SenseContract'
+
+export type ContractInfo = {
+  id: string,
+  type: ContractType,
+  version: number
+}
+
+export type Dependencies = {
+  [id: string]: {
+    id?: string,
+    type: ContractType,
+    version: number
+  }
+}
+
+export type DependencyMap = {
+  [id: string]: string
+}
+
 export interface IContract {
+  info: ContractInfo,
   assets: ContractStateType['assets'],
   table: ContractStateType['table']
 }

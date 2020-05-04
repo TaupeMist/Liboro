@@ -28,18 +28,11 @@ import {
 } from '../portfolio'
 
 export class ForgeContract extends PortfolioContract {
-  public constructor(readonly id: string) { super(id) }
+  public constructor(readonly id: string) {
+    super(id)
 
-  public deploy(chain: chain.StoreType): this {
-    try {
-      super.deploy(chain)
-
-      this.updateTable({})
-    } catch (ex) {
-      throw new Error('Could not deploy contract.')
-    }
-
-    return this
+    this.type = 'ForgeContract'
+    this.version = 1
   }
 
   public configure(config: ConfigureParams): this {

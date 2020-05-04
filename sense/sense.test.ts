@@ -17,14 +17,16 @@ context('Sense', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new ContentContract('content', 'core')
+    new ContentContract('content')
       .deploy(chain)
       .configure({
         asset: 'liboropoints'
       })
 
-    new SenseContract('sense', 'content')
-      .deploy(chain)
+    new SenseContract('sense')
+      .deploy(chain, {
+        content: 'content'
+      })
       .configure({
         asset: 'liboropoints'
       })
@@ -32,6 +34,5 @@ context('Sense', () => {
     const sense = chain.getState().contract.sense as SenseContract
 
     expect(sense.id).to.equal('sense')
-    expect(sense.contentId).to.equal('content')
   })
 })

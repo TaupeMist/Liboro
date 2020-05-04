@@ -17,35 +17,103 @@ import {
   withdraw,
   transfer,
   getWallet,
-  getAsset
+  getAsset,
+  ContractInfo,
+  Dependencies,
+  DependencyMap,
+  ContractType
 } from '.'
 
 export class Contract implements IContract {
-  protected chain?: chain.StoreType
-
   public constructor(readonly id: string) {}
 
-  protected requiresContract(id: string, chain: chain.StoreType = this.chain) {
-    if (!chain) throw new Error('Chain not found. Please ensure that the contract has been deployed.')
+  protected type: ContractType = 'Contract'
 
-    if (!chain.getState().contract[id])
-      throw new Error(`No contract with the id "${id}" was found. Please ensure that the contract has been deployed.`)
+  protected version: number = 1
+
+  protected chain?: chain.StoreType
+
+  protected dependencies: Dependencies = {}
+
+  protected ensureDeployed(
+    chain: chain.StoreType = this.chain,
+    expected: ContractInfo = this.info
+  ) {
+    if (!chain)
+      throw new Error('Chain does not exist. Chain must first be deployed.')
+
+    if (!chain.getState().contract[expected.id])
+      throw new Error(`No contract with the id "${expected.id}" was found. Please ensure that the contract has been deployed.`)
+
+    const contract = chain.getState().contract[expected.id]
+
+    if (contract.type !== expected.type)
+      throw new Error(`The contract "${expected.id}" is type ${contract.type}. Contract type ${expected.type} was expected`)
+
+    if (contract.version !== expected.version)
+      throw new Error(`The contract "${expected.id}" is version ${contract.version}. Contract version ${expected.version} was expected`)
+
+    return true
+  }
+
+  protected validateDependencies(chain: chain.StoreType, dependencyMap: DependencyMap = {}): void {
+    const dependencyKeys = Object.keys(this.dependencies)
+
+    const mapDependency = id => {
+      if (!dependencyMap[id])
+        throw new Error(`Dependency mismatch. Expected dependency "${id}" to be defined in ${JSON.stringify(dependencyMap)}`)
+
+      this.dependencies[id].id = dependencyMap[id]
+    }
+
+    const ensureDeployed = id => this.ensureDeployed(chain, this.dependencies[id] as ContractInfo)
+
+    dependencyKeys.forEach(mapDependency)
+    dependencyKeys.forEach(ensureDeployed)
+  }
+
+  // TODO: rename and clarify usage
+  protected updateTable(config: {
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
+  }) {
+    if (!this.table.asset)
+      this.table.asset = {}
+
+    const { asset } = config
+
+    if (asset) {
+      if (!this.table.asset[asset])
+        this.table.asset[asset] = {
+          id: asset,
+          value: 0,
+          marketCap: 0
+        }
+    }
+  }
+
+  public get info(): ContractInfo {
+    return {
+      id: this.id,
+      type: this.type,
+      version: this.version
+    }
   }
 
   public get assets(): ContractStateType['assets'] {
-    this.requiresContract(this.id)
+    this.ensureDeployed()
 
     return this.chain.getState().contract[this.id].assets
   }
 
   public get table(): TableType {
-    this.requiresContract(this.id)
+    this.ensureDeployed()
 
     return this.chain.getState().contract[this.id].table
   }
 
   public set table(table: TableType) {
-    this.requiresContract(this.id)
+    this.ensureDeployed()
 
     this.chain.execute(setTable(table, this))
   }
@@ -77,19 +145,19 @@ export class Contract implements IContract {
     return getAsset(this.getState())(asset, prevAsset)
   }
 
-  // TODO: add string[] param here in order to specify dependent contracts to ensure that those contracts have been
-  // TODO: deployed to the chain and exist
-  public deploy(chain: chain.StoreType): this {
+  public deploy(chain: chain.StoreType, dependencyMap?: DependencyMap): this {
     if (this.chain) throw new Error('Chain already exists. Cannot override chain.')
 
     try {
+      this.validateDependencies(chain, dependencyMap)
+
       chain.execute(addContract(this))
 
       this.chain = chain
 
       this.updateTable({})
     } catch (ex) {
-      throw new Error('Could not deploy contract.')
+      throw new Error(`Could not deploy contract. ${ex}`)
     }
 
     return this
@@ -165,26 +233,6 @@ export class Contract implements IContract {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this
-  }
-
-  // TODO: rename and clarify usage
-  protected updateTable(config: {
-    wallet?: chain.WalletType,
-    asset?: chain.AssetType
-  }) {
-    if (!this.table.asset)
-      this.table.asset = {}
-
-    const { asset } = config
-
-    if (asset) {
-      if (!this.table.asset[asset])
-        this.table.asset[asset] = {
-          id: asset,
-          value: 0,
-          marketCap: 0
-        }
-    }
   }
 }
 

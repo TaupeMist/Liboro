@@ -22,7 +22,12 @@ import * as chain from '../chain'
 import * as portfolio from '../portfolio'
 
 export class PredictionContract extends portfolio.PortfolioContract {
-  public constructor(readonly id: string) { super(id) }
+  public constructor(readonly id: string) {
+    super(id)
+
+    this.type = 'PredictionContract'
+    this.version = 1
+  }
 
   public set active(active: boolean) {
     this.table.active = active
