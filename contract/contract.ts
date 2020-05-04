@@ -64,6 +64,15 @@ export class Contract implements IContract {
         throw new Error(`Dependency mismatch. Expected dependency "${id}" to be defined in ${JSON.stringify(dependencyMap)}`)
 
       this.dependencies[id].id = dependencyMap[id]
+
+      this[id] = dependencyMap[id]
+
+      // TODO: investigate wether it's possible to assign dynamic getters for the dep contracts
+      // Object.defineProperty(this, id, {
+      //   get: () => {
+      //     return this.chain.getState().contract[id]
+      //   }
+      // })
     }
 
     const ensureDeployed = id => this.ensureDeployed(chain, this.dependencies[id] as ContractInfo)

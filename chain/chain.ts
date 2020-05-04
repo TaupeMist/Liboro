@@ -5,6 +5,8 @@ import {
   CommandType
 } from './types'
 
+import * as contract from '../contract'
+
 export const INITIAL_STATE: StateType = {
   contract: {},
   wallet: {}
@@ -32,6 +34,8 @@ const Store = ({
 
   const getState: StoreType['getState'] = () => ({ ...state })
 
+  const getContract: StoreType['getContract'] = contractId => getState().contract[contractId]
+
   const getStateHistory: StoreType['getStateHistory'] = () => ([ ...stateHistory ])
 
   const getCommandHistory: StoreType['getCommandHistory'] = () => ([ ...commandHistory ])
@@ -52,6 +56,7 @@ const Store = ({
     undo,
     select,
     getState,
+    getContract,
     getStateHistory,
     getCommandHistory,
     debug

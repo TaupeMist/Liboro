@@ -67,6 +67,7 @@ export type StoreType = {
   undo: () => void,
   select: (func: (StateType) => StateType) => StateType,
   getState: () => StateType,
+  getContract: (contractId) => Contract,
   getStateHistory: () => StateType[],
   getCommandHistory: () => CommandType[],
   debug: (command?: CommandType) => {}

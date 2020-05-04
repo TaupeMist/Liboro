@@ -11,10 +11,6 @@ import {
 } from './contract'
 
 import {
-  getTable
-} from './selectors'
-
-import {
   CommandType,
   ExecuteType,
   AssetType,

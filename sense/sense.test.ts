@@ -4,34 +4,59 @@ import { expect } from 'chai'
 import { Chain, addWallet, WalletType } from '../chain'
 
 import { SenseContract } from '.'
+import { CoreContract } from '../core'
 import { ContentContract } from '../content'
+
+const init = () => {
+  const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+
+  const wallet: WalletType = {
+    id: 'wallet',
+    assets: {}
+  }
+
+  chain.execute(addWallet(wallet))
+
+  new CoreContract('core')
+    .deploy(chain)
+    .configure({
+      asset: 'liboropoints'
+    })
+
+  new ContentContract('content')
+    .deploy(chain, {
+      core: 'core'
+    })
+
+  const senseContract = new SenseContract('sense')
+    .deploy(chain, {
+      content: 'content'
+    })
+
+  return {
+    chain,
+    wallet,
+    senseContract
+  }
+}
 
 context('Sense', () => {
   it('can init', () => {
-    const chain = Chain({ initialState: { wallet: {}, contract: {} } })
+    expect(init).not.to.throw
 
-    const taupemist: WalletType = {
-      id: 'taupemist',
-      assets: {}
-    }
+    const { chain } = init()
 
-    chain.execute(addWallet(taupemist))
+    const { sense } = chain.getState().contract
 
-    new ContentContract('content')
-      .deploy(chain)
-      .configure({
-        asset: 'liboropoints'
-      })
+    expect(sense.id).to.equal('sense')
+  })
 
-    new SenseContract('sense')
-      .deploy(chain, {
-        content: 'content'
-      })
-      .configure({
-        asset: 'liboropoints'
-      })
+  it('can interact', () => {
+    const { chain, wallet, senseContract } = init()
 
-    const sense = chain.getState().contract.sense as SenseContract
+    senseContract.interact(wallet)
+
+    const { sense } = chain.getState().contract
 
     expect(sense.id).to.equal('sense')
   })
