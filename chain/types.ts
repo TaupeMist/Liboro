@@ -59,11 +59,8 @@ export interface StoreConfig {
 
 export type ExecuteType = (state: StateType) => StateType
 
-export type UndoType = (state?: StateType) => StateType
-
 export type CommandType = {
-  execute: ExecuteType,
-  undo: UndoType
+  execute: ExecuteType
 }
 
 export type StoreType = {

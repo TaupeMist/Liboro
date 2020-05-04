@@ -16,9 +16,7 @@ import {
 
 import {
   CommandType,
-  AssetHardType,
   ExecuteType,
-  UndoType,
   AssetType,
   WalletType
 } from '../chain'
@@ -32,17 +30,8 @@ export const addAsset = (asset: AssetType, target: Contract): CommandType => {
     return { ...state, contract }
   }
 
-  const undo: UndoType = state => {
-    const { contract } = state;
-
-    delete contract[target.id].assets[asset.toLowerCase()]
-
-    return { ...state, contract }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
 
@@ -63,19 +52,8 @@ export const deposit = (
     return { ...state, contract }
   }
 
-  const undo: UndoType = state => {
-    const { contract } = state;
-    const { baseToken } = getTable(state, contractId)
-
-    contract[contractId].assets[asset] = 0
-    contract[contractId].assets[baseToken.id] = 0
-
-    return { ...state, contract }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
 
@@ -95,19 +73,8 @@ export const withdraw = (
     return { ...state, contract }
   }
 
-  const undo: UndoType = state => {
-    const { contract } = state;
-    const { baseToken } = getTable(state, contractId)
-
-    contract[contractId].assets[asset] = 0
-    contract[contractId].assets[baseToken.id] = 0
-
-    return { ...state, contract }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
 
@@ -130,19 +97,8 @@ export const transfer = (
     return { ...state, wallet }
   }
 
-  const undo: UndoType = state => {
-    const { wallet } = state
-
-    wallet[sender.id].assets[asset] = format(wallet[sender.id].assets[asset] + amount)
-
-    wallet[receiver.id].assets[asset] = format(wallet[receiver.id].assets[asset] - amount)
-
-    return { ...state, wallet }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
 
@@ -161,16 +117,7 @@ export const setTable = (
     return { ...state, contract }
   }
 
-  const undo: UndoType = state => {
-    const { contract } = state;
-
-    contract[target.id].table = { ...prev }
-
-    return { ...state, contract }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }

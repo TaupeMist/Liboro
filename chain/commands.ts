@@ -1,7 +1,6 @@
 import {
   CommandType,
   ExecuteType,
-  UndoType,
   WalletType
 } from './types'
 
@@ -16,14 +15,8 @@ export const addWallet = (wallet: WalletType): CommandType => {
     return state
   }
 
-  const undo: UndoType = state => {
-    prev = state
-    return { ...prev }
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
 
@@ -40,14 +33,7 @@ export const addContract = (contract: any): CommandType => {
     return state
   }
 
-  const undo: UndoType = state => {
-    delete state.contract[contract.id]
-
-    return state
-  }
-
   return {
-    execute,
-    undo
+    execute
   }
 }
