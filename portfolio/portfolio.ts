@@ -99,7 +99,7 @@ export class PortfolioContract extends Contract {
     return this
   }
 
-  public seed(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
+  public seed(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
     this.updateTable({ asset, wallet })
 
     this.addAsset(asset, wallet)

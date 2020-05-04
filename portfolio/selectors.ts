@@ -56,7 +56,7 @@ export const getReserves = (state: contract.ContractStateType) => (wallet: Walle
   return assetIds.reduce(intoPortfolio, {})
 }
 
-export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: chain.AssetHardType): boolean => {
+export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: chain.AssetType): boolean => {
   return wallet.reserves[assetId].baseTokenValue >= amount
 }
 

@@ -11,7 +11,7 @@ export type AssetType = contract.AssetType & {
 }
 
 export type ConfigureParams = {
-  asset: chain.AssetHardType,
+  asset: chain.AssetType,
   wallet?: chain.WalletType
 }
 
@@ -23,10 +23,10 @@ export type WalletType = portfolio.WalletType & {
   credit: CreditType,
   creditBuyable: CreditType,
   balance: {
-    [A in chain.AssetHardType | TokenType]?: number
+    [A in chain.AssetType | TokenType]?: number
   },
   total: {
-    [A in chain.AssetHardType | TokenType]?: number
+    [A in chain.AssetType | TokenType]?: number
   }
 }
 
@@ -44,7 +44,7 @@ export type PredictionType = BooleanPrediction
 export type PredictionSummary = {
   prediction: PredictionType,
   nextBalance: {
-    [A in chain.AssetHardType | TokenType]?: number
+    [A in chain.AssetType | TokenType]?: number
   },
   nextCredit: CreditType
 }
@@ -65,7 +65,7 @@ export type CreditBuybackSummary = {
     value: number
   },
   nextBalance: {
-    [A in chain.AssetHardType | TokenType]?: number
+    [A in chain.AssetType | TokenType]?: number
   },
   nextCredit: CreditType
 }

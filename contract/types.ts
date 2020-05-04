@@ -57,7 +57,7 @@ export interface IContract {
 }
 
 export type ConfigureParams = {
-  asset: chain.AssetHardType,
+  asset: chain.AssetType,
   token?: chain.AssetType,
   baseAsset?: number
 }

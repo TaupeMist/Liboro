@@ -26,7 +26,7 @@ export type WalletType = chain.WalletType & {
   portfolio: PortfolioType,
   reserves?: WalletPortfolioType,
   ratioOfMarketCap?: number,
-  canBurn?: (amount: number, assetId: chain.AssetHardType) => boolean,
+  canBurn?: (amount: number, assetId: chain.AssetType) => boolean,
   baseTokenValue?: number
 }
 
@@ -51,7 +51,7 @@ export type TableType = {
 export type GetPorfolioType = (portfolio: chain.PortfolioType) => chain.PortfolioType
 
 export type ConfigureParams = {
-  asset: chain.AssetHardType,
+  asset: chain.AssetType,
   token?: chain.AssetType,
   baseAsset?: number,
   wallet?: chain.WalletType

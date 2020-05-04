@@ -59,7 +59,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public mint(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
+  public mint(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
     const deposit = {
       ...this.getAsset(asset),
       value: amount
@@ -111,7 +111,7 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public burn(amount: number, asset: chain.AssetHardType, wallet: chain.WalletType): this {
+  public burn(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
     const burner = this.getWallet(wallet)
 
     if (!burner.canBurn(amount, asset))

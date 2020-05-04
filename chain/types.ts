@@ -1,9 +1,8 @@
 import { Contract } from '../contract'
 
-// TODO: liboropoints is not a hard type and should be removed
-export type AssetHardType = 'usd' | 'eur' | 'gold' | 'eos' | 'liborodollar' | 'liboropoints'
+export type AssetPredefined = 'usd' | 'eur' | 'gold' | 'eos' | 'liborodollar' | 'liboropoints'
 
-export type AssetType = AssetHardType | string
+export type AssetType = AssetPredefined | string
 
 export type WalletType = {
   id: string,
