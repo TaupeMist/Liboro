@@ -26,7 +26,6 @@ export type WalletType = chain.WalletType & {
   portfolio: PortfolioType,
   reserves?: WalletPortfolioType,
   ratioOfMarketCap?: number,
-  canBurn?: (amount: number, assetId: chain.AssetType) => boolean,
   baseTokenValue?: number
 }
 

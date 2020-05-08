@@ -56,10 +56,6 @@ export const getReserves = (state: contract.ContractStateType) => (wallet: Walle
   return assetIds.reduce(intoPortfolio, {})
 }
 
-export const getCanBurn = (wallet: WalletType) => (amount: number, assetId: chain.AssetType): boolean => {
-  return wallet.reserves[assetId].baseTokenValue >= amount
-}
-
 export const getWallet = (state: contract.ContractStateType) => (wallet: chain.WalletType): WalletType => {
   const portfolio = getPortfolio(state)[wallet.id] || {}
 
@@ -72,7 +68,6 @@ export const getWallet = (state: contract.ContractStateType) => (wallet: chain.W
 
   if (state.table.baseToken) {
     fullWallet.ratioOfMarketCap = contract.getWalletRatioOfMarketCap(state)(fullWallet)
-    fullWallet.canBurn = getCanBurn(fullWallet)
   }
 
   return fullWallet

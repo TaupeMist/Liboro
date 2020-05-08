@@ -20,9 +20,6 @@ export const mint = (
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
 
-    // TODO: replace with better system
-    // if (!hasFunds(assetSelling.value, baseToken, assetSelling.id, wallet[buyer.id])(getContract(state, contractId))) return state
-
     const { assets } = wallet[buyer.id]
 
     wallet[buyer.id].assets[assetSelling.id] = format(assets[assetSelling.id] - assetSelling.value)
@@ -39,7 +36,7 @@ export const mint = (
   }
 }
 
-export const burn = (
+export const melt = (
   assetBuying: AssetType,
   buyer: WalletType,
   contractId: string,
@@ -48,9 +45,6 @@ export const burn = (
   const execute: ExecuteType = state => {
     const { contract, wallet } = state
     const { baseToken } = getTable(state, contractId)
-
-    // TODO: replace with better system
-    // if (!hasFunds(assetBuying.value, baseToken, assetBuying.id, wallet[buyer.id])(getContract(state, contractId))) return state
 
     const { assets } = wallet[buyer.id]
 

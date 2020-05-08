@@ -1,17 +1,14 @@
 import {
+  ConfigureParams,
+  WalletType,
   mint,
-  burn
-} from './commands'
-
-import {
+  melt,
   calcMintPayable,
-  rebalanceMint
-} from './minting'
-
-import {
-  calcBurnPayable,
-  rebalanceBurn
-} from './burning'
+  rebalanceMint,
+  calcMeltPayable,
+  rebalanceMelt,
+  getWallet
+} from '.'
 
 import * as chain from '../chain'
 
@@ -23,7 +20,6 @@ import {
 import {
   PortfolioContract,
   calcGlobalPortfolio,
-  ConfigureParams,
   PortfolioType
 } from '../portfolio'
 
@@ -35,10 +31,14 @@ export class ForgeContract extends PortfolioContract {
     this.version = 1
   }
 
+  public getWallet = (wallet: chain.WalletType): WalletType => {
+    return getWallet(this.getState())(wallet)
+  }
+
   public configure(config: ConfigureParams): this {
     super.configure(config)
 
-    const { asset, wallet } = config
+    const { asset, wallet, burnWallet } = config
 
     this.updateTable({ asset, wallet })
 
@@ -55,6 +55,9 @@ export class ForgeContract extends PortfolioContract {
 
     if (wallet)
       this.table.portfolio[getWalletId(wallet)] = { ...initialPortfolio }
+
+    if (burnWallet)
+      this.table.burnWallet = burnWallet
 
     return this
   }
@@ -111,39 +114,39 @@ export class ForgeContract extends PortfolioContract {
     return this
   }
 
-  public burn(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
-    const burner = this.getWallet(wallet)
+  public melt(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
+    const fullwallet = this.getWallet(wallet)
 
-    if (!burner.canBurn(amount, asset))
-      throw new Error(`User ${wallet.id} cannot burn ${amount} of ${this.baseToken.id} to recieve ${asset}`)
+    if (!fullwallet.canMelt(amount, asset))
+      throw new Error(`User ${wallet.id} cannot melt ${amount} of ${this.baseToken.id} to recieve ${asset}`)
 
     const withdrawal = {
       ...this.getAsset(asset),
       value: amount
     }
 
-    const payable = calcBurnPayable(
+    const payable = calcMeltPayable(
       withdrawal,
       this.assets[withdrawal.id],
       this.baseToken,
-      burner
+      fullwallet
     )
 
     const descreasePortfolioAsset = (portfolio: PortfolioType): PortfolioType => {
-      const burner = this.getWallet(wallet)
+      const fullwallet = this.getWallet(wallet)
 
       if (!wallet.assets[this.baseToken.id] || wallet.assets[this.baseToken.id] === undefined)
         return portfolio
 
       // When wallet portfolio cannot be decreased
-      if (burner.portfolio[withdrawal.id] === 0)
+      if (fullwallet.portfolio[withdrawal.id] === 0)
         return portfolio
 
-      const nextPortfolio = rebalanceBurn(
+      const nextPortfolio = rebalanceMelt(
         portfolio,
         this.table.portfolio.global,
         this.getAsset(asset),
-        burner
+        fullwallet
       )
 
       return nextPortfolio
@@ -151,7 +154,7 @@ export class ForgeContract extends PortfolioContract {
 
     this.rebalance(descreasePortfolioAsset, wallet)
 
-    this.chain.execute(burn(withdrawal, wallet, this.id, payable))
+    this.chain.execute(melt(withdrawal, wallet, this.id, payable))
 
     // TODO: calc and set wallet portfolio
     this.table.portfolio.global = calcGlobalPortfolio(
@@ -170,6 +173,35 @@ export class ForgeContract extends PortfolioContract {
     }
 
     return this
+  }
+
+  public burn(amount: number, asset: chain.AssetType, wallet: chain.WalletType): this {
+    const fullwallet = this.getWallet(wallet)
+
+    if (asset !== this.baseAsset.id)
+      throw new Error(`User ${wallet.id} cannot burn ${amount} of ${asset}. Burning is restricted to base asset ${this.baseAsset.id}`)
+
+    if (!fullwallet.canBurn(amount, asset))
+      throw new Error(`User ${wallet.id} cannot burn ${amount} of ${asset}`)
+
+    this.withdraw(amount, asset, this.burnWallet)
+
+    // TODO: move calc to utils
+    this.table.asset[asset].marketCap = format(this.table.asset[asset].marketCap - amount)
+
+    return this
+  }
+
+  protected get burnWallet(): chain.WalletType {
+    if (!this.table.burnWallet)
+      throw new Error('Cannot burn. No burn wallet exists')
+
+    const wallet = this.chain.getState().wallet[this.table.burnWallet]
+
+    if (!wallet)
+      throw new Error(`Burn wallet ${this.table.burnWallet} was not found`)
+
+    return wallet
   }
 
   // TODO: rename and clarify usage
@@ -200,3 +232,5 @@ export class ForgeContract extends PortfolioContract {
     super.updateTable(config)
   }
 }
+
+export default ForgeContract

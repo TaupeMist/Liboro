@@ -5,11 +5,7 @@ import {
 } from './types'
 
 export const addWallet = (wallet: WalletType): CommandType => {
-  let prev = undefined;
-
   const execute: ExecuteType = state => {
-    prev = state
-
     state.wallet[wallet.id] = wallet
 
     return state

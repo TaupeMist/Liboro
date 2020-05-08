@@ -26,12 +26,12 @@ describe('Chain', () => {
     it('can be registered', () => {
       const chain = Chain({ initialState: { wallet: {}, contract: {} } })
 
-      new Contract('liboro')
+      new Contract('contract')
         .deploy(chain)
 
       const { contract } = chain.getState()
 
-      expect(contract.liboro).to.exist
+      expect(contract.contract).to.exist
     })
   })
 

@@ -102,12 +102,9 @@ export const setTable = (
   table: ContractStateType['table'],
   target: Contract
 ): CommandType => {
-  let prev
-
   const execute: ExecuteType = state => {
     const { contract } = state;
 
-    prev = { ...contract[target.id].table }
     contract[target.id].table = table
 
     return { ...state, contract }

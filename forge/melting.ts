@@ -13,21 +13,21 @@ import {
   AssetType
 } from '../contract'
 
-export const calcBurnPayable = (
+export const calcMeltPayable = (
   withdrawal: AssetType,
   contractAsset: number,
   baseToken: AssetType,
-  burner: WalletType
+  wallet: WalletType
 ): AssetType => {
   const { percentageOfMarketCap } = baseToken.compare(withdrawal)
 
   return {
     ...withdrawal,
-    value: format(percentageOfMarketCap * contractAsset * burner.reserves[withdrawal.id].ratio)
+    value: format(percentageOfMarketCap * contractAsset * wallet.reserves[withdrawal.id].ratio)
   }
 }
 
-export const rebalanceBurn = (
+export const rebalanceMelt = (
   portfolio: PortfolioType,
   contractPortfolio: PortfolioType,
   asset: AssetType,

@@ -22,7 +22,7 @@ describe('Portfolio', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new PortfolioContract('liboro')
+    new PortfolioContract('portfolio')
       .deploy(chain)
       .configure({
         asset: 'usd',
@@ -32,14 +32,14 @@ describe('Portfolio', () => {
       })
       .rebalance(flatten, taupemist)
 
-    const { liboro } = chain.getState().contract
+    const { portfolio } = chain.getState().contract
 
-    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+    expect(portfolio.table.portfolio.taupemist).to.deep.equal({
       usd: 50,
       liborodollar: 50
     })
 
-    expect(liboro.table.portfolio.global).to.deep.equal({
+    expect(portfolio.table.portfolio.global).to.deep.equal({
       usd: 50,
       liborodollar: 50
     })
@@ -57,7 +57,7 @@ describe('Portfolio', () => {
 
     chain.execute(addWallet(taupemist))
 
-    new PortfolioContract('liboro')
+    new PortfolioContract('portfolio')
       .deploy(chain)
       .configure({
         asset: 'usd',
@@ -67,17 +67,17 @@ describe('Portfolio', () => {
       })
       .seed(100, 'eos', taupemist)
 
-    const { liboro } = chain.getState().contract
+    const { portfolio } = chain.getState().contract
 
-    expect(liboro.assets.eos).to.equal(100)
+    expect(portfolio.assets.eos).to.equal(100)
 
-    expect(liboro.table.portfolio.taupemist).to.deep.equal({
+    expect(portfolio.table.portfolio.taupemist).to.deep.equal({
       eos: 100,
       usd: 0,
       liborodollar: 0
     })
 
-    expect(liboro.table.portfolio.global).to.deep.equal({
+    expect(portfolio.table.portfolio.global).to.deep.equal({
       eos: 100,
       usd: 0,
       liborodollar: 0

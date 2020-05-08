@@ -3,8 +3,7 @@ import {
   WalletType,
   CreditType,
   getTotal,
-  getCreditBuyable,
-  TokenType
+  getCreditBuyable
 } from '.';
 
 import * as chain from '../chain'
