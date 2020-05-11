@@ -5,8 +5,6 @@ import {
   CommandType
 } from './types'
 
-import * as contract from '../contract'
-
 export const INITIAL_STATE: StateType = {
   contract: {},
   wallet: {}
@@ -17,6 +15,8 @@ const Store = ({
   onMutation
 }: StoreConfig = {}): StoreType => {
   let state = { ...initialState }
+  let dateTime: Date = undefined
+
   const stateHistory: StateType[] = []
   const commandHistory: CommandType[] = []
 
@@ -51,6 +51,18 @@ const Store = ({
     }
   }
 
+  const getDateTime: StoreType['getDateTime'] = () => {
+    return dateTime || new Date
+  }
+
+  const setDateTime: StoreType['setDateTime'] = (newDateTime: Date) => {
+    dateTime = newDateTime
+  }
+
+  const incrementDay: StoreType['incrementDay'] = (days = 1) => {
+    setDateTime(new Date(getDateTime().getDate() + days))
+  }
+
   return {
     execute,
     undo,
@@ -59,6 +71,9 @@ const Store = ({
     getContract,
     getStateHistory,
     getCommandHistory,
+    getDateTime,
+    setDateTime,
+    incrementDay,
     debug
   }
 }

@@ -67,10 +67,13 @@ export type StoreType = {
   undo: () => void,
   select: (func: (StateType) => StateType) => StateType,
   getState: () => StateType,
-  getContract: (contractId) => Contract,
+  getContract: (contractId: string) => Contract,
   getStateHistory: () => StateType[],
   getCommandHistory: () => CommandType[],
-  debug: (command?: CommandType) => {}
+  debug: (command?: CommandType) => {},
+  getDateTime: () => Date,
+  setDateTime: (date: Date) => void,
+  incrementDay: () => void
 }
 
 export type ContractStateType = {
