@@ -14,23 +14,27 @@ export class SenseContract extends contract.Contract {
     }
   }
 
-  public content: string
-
   public interact(wallet: chain.WalletType): this {
-    this.ensureDeployed()
-
-    const user = this.getUser(wallet)
-    console.log('interact:user', user)
-
-    // TODO: mint interaction points based on the user's liboropoints
+    this
+      .getSmith()
+      .mintInteraction(wallet)
+      .convertInteraction(wallet)
 
     return this
   }
 
-  protected getUser = (wallet: chain.WalletType) => {
-    const contentContract = this.chain.getContract(this.content) as content.ContentContract
+  protected getContent() {
+    this.ensureDeployed()
 
-    return contentContract.getCore().getUser(wallet)
+    return this.chain.getContract(this.dependencies.content.id) as content.ContentContract
+  }
+
+  protected getCore() {
+    return this.getContent().getCore()
+  }
+
+  protected getSmith() {
+    return this.getCore().getSmith()
   }
 }
 

@@ -13,12 +13,10 @@ export class ContentContract extends contract.Contract {
     }
   }
 
-  public core: string
-
-  public getCore = (): core.CoreContract => {
+  public getCore = () => {
     this.ensureDeployed()
 
-    return this.chain.getContract(this.core) as core.CoreContract
+    return this.chain.getContract(this.dependencies.core.id) as core.CoreContract
   }
 }
 

@@ -6,6 +6,7 @@ import { Chain, addWallet, WalletType } from '../chain'
 import { SenseContract } from '.'
 import { CoreContract } from '../core'
 import { ContentContract } from '../content'
+import { SmithContract } from '../smith'
 
 const init = () => {
   const chain = Chain({ initialState: { wallet: {}, contract: {} } })
@@ -31,6 +32,15 @@ const init = () => {
   const senseContract = new SenseContract('sense')
     .deploy(chain, {
       content: 'content'
+    })
+
+  new SmithContract('smith')
+    .deploy(chain, {
+      core: 'core'
+    })
+    .configure({
+      asset: 'liboropoints',
+      mintMult: 100
     })
 
   return {

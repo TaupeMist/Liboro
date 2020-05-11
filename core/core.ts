@@ -1,9 +1,11 @@
 import {
-  getUser
+  getWallet,
+  WalletType
 } from '.'
 
 import * as chain from '../chain'
 import * as contract from '../contract'
+import * as smith from '../smith'
 
 export class CoreContract extends contract.Contract {
   public constructor(readonly id: string) {
@@ -31,10 +33,15 @@ export class CoreContract extends contract.Contract {
       }
   }
 
-  public getUser = (wallet: chain.WalletType): chain.WalletType => {
+  public getWallet = (wallet: chain.WalletType): WalletType => {
     this.updateTable({ wallet })
 
-    return getUser(this.getState())(wallet)
+    return getWallet(this.getState())(wallet)
+  }
+
+
+  public getSmith = () => {
+    return this.getChild('SmithContract') as smith.SmithContract
   }
 }
 

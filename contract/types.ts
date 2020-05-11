@@ -30,7 +30,7 @@ export type ContractStateType = {
   table: TableType
 }
 
-export type ContractType = 'Contract' | 'CoreContract' | 'ContentContract' | 'ForgeContract' | 'PortfolioContract' | 'PredictionContract' | 'SenseContract'
+export type ContractType = 'Contract' | 'CoreContract' | 'ContentContract' | 'ForgeContract' | 'PortfolioContract' | 'PredictionContract' | 'SenseContract' | 'SmithContract'
 
 export type ContractInfo = {
   id: string,
