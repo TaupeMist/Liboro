@@ -48,7 +48,7 @@ describe('Contract', () => {
       })
     }
 
-    expect(withoutDependentConract).to.throw('Could not deploy contract. Error: No contract with the id "content" was found. Please ensure that the contract has been deployed.');
+    expect(withoutDependentConract).to.throw('Could not deploy contract. Error: Dependency mismatch. Expected dependent contract "content" to have been deployed')
   })
 
   it('should throw if dependent contract mapping does not exist', () => {

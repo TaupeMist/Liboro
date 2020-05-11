@@ -27,80 +27,6 @@ import {
 export class Contract implements IContract {
   public constructor(readonly id: string) {}
 
-  protected type: ContractType = 'Contract'
-
-  protected version: number = 1
-
-  protected chain?: chain.StoreType
-
-  protected dependencies: Dependencies = {}
-
-  protected ensureDeployed(
-    chain: chain.StoreType = this.chain,
-    expected: ContractInfo = this.info
-  ) {
-    if (!chain)
-      throw new Error('Chain does not exist. Chain must first be deployed.')
-
-    if (!chain.getState().contract[expected.id])
-      throw new Error(`No contract with the id "${expected.id}" was found. Please ensure that the contract has been deployed.`)
-
-    const contract = chain.getState().contract[expected.id]
-
-    if (contract.type !== expected.type)
-      throw new Error(`The contract "${expected.id}" is type ${contract.type}. Contract type ${expected.type} was expected`)
-
-    if (contract.version !== expected.version)
-      throw new Error(`The contract "${expected.id}" is version ${contract.version}. Contract version ${expected.version} was expected`)
-
-    return true
-  }
-
-  protected validateDependencies(chain: chain.StoreType, dependencyMap: DependencyMap = {}): void {
-    const dependencyKeys = Object.keys(this.dependencies)
-
-    const mapDependency = id => {
-      if (!dependencyMap[id])
-        throw new Error(`Dependency mismatch. Expected dependency "${id}" to be defined in ${JSON.stringify(dependencyMap)}`)
-
-      this.dependencies[id].id = dependencyMap[id]
-
-      this[id] = dependencyMap[id]
-
-      // TODO: investigate wether it's possible to assign dynamic getters for the dep contracts
-      // Object.defineProperty(this, id, {
-      //   get: () => {
-      //     return this.chain.getState().contract[id]
-      //   }
-      // })
-    }
-
-    const ensureDeployed = id => this.ensureDeployed(chain, this.dependencies[id] as ContractInfo)
-
-    dependencyKeys.forEach(mapDependency)
-    dependencyKeys.forEach(ensureDeployed)
-  }
-
-  // TODO: rename and clarify usage
-  protected updateTable(config: {
-    wallet?: chain.WalletType,
-    asset?: chain.AssetType
-  }) {
-    if (!this.table.asset)
-      this.table.asset = {}
-
-    const { asset } = config
-
-    if (asset) {
-      if (!this.table.asset[asset])
-        this.table.asset[asset] = {
-          id: asset,
-          value: 0,
-          marketCap: 0
-        }
-    }
-  }
-
   public get info(): ContractInfo {
     return {
       id: this.id,
@@ -139,12 +65,10 @@ export class Contract implements IContract {
     return this.getAsset(this.table.baseAsset.id, this.table.baseAsset)
   }
 
-  public getState = (): ContractStateType => {
-    return {
-      assets: { ...this.assets },
-      table: { ...this.table }
-    }
-  }
+  public getState = (): ContractStateType => ({
+    assets: { ...this.assets },
+    table: { ...this.table }
+  })
 
   public getWallet = (wallet: chain.WalletType): WalletType => {
     return getWallet(this.getState())(wallet)
@@ -242,6 +166,108 @@ export class Contract implements IContract {
     this.chain.execute(transfer(amount, asset, sender, receiver))
 
     return this
+  }
+
+  protected type: ContractType = 'Contract'
+
+  protected version: number = 1
+
+  protected chain?: chain.StoreType
+
+  protected dependencies: Dependencies = {}
+
+  protected ensureDeployed(
+    chain: chain.StoreType = this.chain,
+    expected: ContractInfo = this.info
+  ) {
+    if (!chain)
+      throw new Error('Chain does not exist. Chain must first be deployed.')
+
+    if (!chain.getState().contract[expected.id])
+      throw new Error(`No contract with the id "${expected.id}" was found. Please ensure that the contract has been deployed.`)
+
+    const contract = chain.getState().contract[expected.id]
+
+    if (contract.type !== expected.type)
+      throw new Error(`The contract "${expected.id}" is type ${contract.type}. Contract type ${expected.type} was expected`)
+
+    if (contract.version !== expected.version)
+      throw new Error(`The contract "${expected.id}" is version ${contract.version}. Contract version ${expected.version} was expected`)
+
+    return true
+  }
+
+  protected validateDependencies(chain: chain.StoreType, dependencyMap: DependencyMap = {}): void {
+    const dependencyKeys = Object.keys(this.dependencies)
+
+    const mapDependency = id => {
+      if (!dependencyMap[id])
+        throw new Error(`Dependency mismatch. Expected dependency "${id}" to be defined in ${JSON.stringify(dependencyMap)}`)
+
+      // Add reference of parent contract to child contract
+      this.dependencies[id].id = dependencyMap[id]
+
+      const dependentContract = chain.getState().contract[id]
+
+      if (!dependentContract)
+        throw new Error(`Dependency mismatch. Expected dependent contract "${id}" to have been deployed`)
+
+      // Add reference of child contract to parent contract
+      dependentContract.setChild(this.type, this.id)
+
+      // TODO: investigate wether it's possible to assign dynamic getters for the dep contracts
+      // Object.defineProperty(this, id, {
+      //   get: () => {
+      //     return this.chain.getState().contract[id]
+      //   }
+      // })
+    }
+
+    const ensureDeployed = id => this.ensureDeployed(chain, this.dependencies[id] as ContractInfo)
+
+    dependencyKeys.forEach(mapDependency)
+    dependencyKeys.forEach(ensureDeployed)
+  }
+
+  protected get getDateTime() {
+    this.ensureDeployed()
+
+    return this.chain.getDateTime()
+  }
+
+  public setChild = (contract: ContractType, contractId: string) => {
+    this[contract] = contractId
+  }
+
+  protected getChild(contract: ContractType) {
+    const childId = this[contract]
+
+    if (!childId)
+      throw new Error(`Child undefined. Expected child contract of type "${contract}" to exist`)
+
+    this.ensureDeployed()
+
+    return this.chain.getState().contract[childId]
+  }
+
+  // TODO: rename and clarify usage
+  protected updateTable(config: {
+    wallet?: chain.WalletType,
+    asset?: chain.AssetType
+  }) {
+    if (!this.table.asset)
+      this.table.asset = {}
+
+    const { asset } = config
+
+    if (asset) {
+      if (!this.table.asset[asset])
+        this.table.asset[asset] = {
+          id: asset,
+          value: 0,
+          marketCap: 0
+        }
+    }
   }
 }
 
