@@ -16,5 +16,11 @@
     "mocha": "^7.1.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.4.0",
+    "redux-logger": "^3.0.6",
+    "reselect": "^4.0.0",
+    "uuid": "^8.1.0"
   }
 }
