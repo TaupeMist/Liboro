@@ -1,13 +1,16 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, AnyAction } from '@reduxjs/toolkit'
 
 import store from './store'
-import Contract, { setContract } from './contract'
-import { setState } from './state'
+import * as contract from './contract.types'
 
 export interface State {
   ids: string[],
   entities: {
-    [k: string]: any
+    [k: string]: {
+      id: string,
+      contractId: string,
+      contractIds: string[]
+    }
   }
 }
 
@@ -22,9 +25,12 @@ export interface AddAddressPayload {
 
 export const reducers = {
   addAddress(state, action: PayloadAction<AddAddressPayload>) {
-    const { id, ...rest } = action.payload
+    const { id } = action.payload
 
-    state.entities[id] = { id, ...rest }
+    state.entities[id] = {
+      id,
+      contractIds: []
+    }
     state.ids.push(id)
   },
 }
@@ -33,13 +39,16 @@ export const slice = createSlice({
   name: 'address',
   initialState,
   reducers,
-  extraReducers: {
-    [setContract.type]: (state, action) => {
-      const { contractId, addressId } = action.payload
+  extraReducers: builder =>
+    builder
+      .addMatcher(
+        (action): action is AnyAction => action.type.startsWith(contract.SET_CONTRACT),
+        (state, action) => {
+          const { addressId, contractId } = action.payload
 
-      state.entities[addressId].contractId = contractId
-    }
-  }
+          state.entities[addressId].contractId = contractId
+        }
+      )
 })
 
 export const {
@@ -63,17 +72,6 @@ export class Address {
 
   public get state() {
     return stateSelector(this.chain.getState(), this.id)
-  }
-
-  // public getContract() {
-  //   return new Contract(this, id)
-  // }
-
-  setContract(id) {
-    this.chain.dispatch(setContract({
-      addressId: this.id,
-      contractId: id
-    }))
   }
 }
 
