@@ -1,4 +1,4 @@
-import Address, { addAddress } from '../chain v2/address'
+import Address, { addAddress } from './address'
 
 import store from './store'
 
@@ -25,7 +25,7 @@ export class Chain {
   constructor(private chain: typeof store) { }
 
   addAddress(id) {
-    this.chain.dispatch(addAddress(id))
+    this.chain.dispatch(addAddress({ id }))
 
     return new Address(this.chain, id)
   }

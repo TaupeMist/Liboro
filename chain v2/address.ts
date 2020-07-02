@@ -1,63 +1,70 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, AnyAction } from '@reduxjs/toolkit'
 
 import store from './store'
+import * as contract from './contract.types'
 
-import * as data from './data'
-
-import Contract, * as contract from './contract'
-
-interface AddAddressPayload extends data.AddPayload { }
-
-interface AddContractPayload {
-  id: string,
-  contract: contract.ContractPayload
+export interface State {
+  ids: string[],
+  entities: {
+    [k: string]: {
+      id: string,
+      contractId: string,
+      contractIds: string[]
+    }
+  }
 }
 
-interface State extends data.State {}
-
 export const initialState: State = {
-  ...data.initialState
+  ids: [],
+  entities: {}
+}
+
+export interface AddAddressPayload {
+  id: string
+}
+
+export const reducers = {
+  addAddress(state, action: PayloadAction<AddAddressPayload>) {
+    const { id } = action.payload
+
+    state.entities[id] = {
+      id,
+      contractIds: []
+    }
+    state.ids.push(id)
+  },
 }
 
 export const slice = createSlice({
   name: 'address',
   initialState,
-  reducers: {
-    addAddress: {
-      prepare(id) {
-        return {
-          payload: {
-            contract: contract.initialState,
-            id
-          }
+  reducers,
+  extraReducers: builder =>
+    builder
+      .addMatcher(
+        (action): action is AnyAction => action.type.startsWith(contract.SET_CONTRACT),
+        (state, action) => {
+          const { addressId, contractId } = action.payload
+
+          state.entities[addressId].contractId = contractId
         }
-      },
-      reducer(state, action: PayloadAction<AddAddressPayload>) {
-        data.default(state, data.add(action.payload))
-      }
-    },
-    addContract(state, action: PayloadAction<AddContractPayload>) {
-      contract.slice.reducer(
-        state.entities[action.payload.id].contract,
-        contract.add(action.payload.contract)
       )
-    }
-  },
 })
 
 export const {
-  addAddress,
-  addContract
+  addAddress
 } = slice.actions
 
-const stateSelector = (state, id) => state.address.entities[id]
+const stateSelector = (state, id) => state.entities[id]
 
-const contractSelector = (state, id) => stateSelector(state, id).contract
+export function getContractStateId({ addressId, contractId, contractStateId }) {
+  if (contractStateId) {
+    const [addressId, contractId] = contractStateId.split('-')
 
-const contractsSelector = (state, id) => {
-  const contract = contractSelector(state, id)
+    return { addressId, contractId  }
+  }
 
-  return contract.ids.map(id => contract.entities[id])
+  return { addressId, contractId  }
 }
 
 export class Address {
@@ -65,27 +72,6 @@ export class Address {
 
   public get state() {
     return stateSelector(this.chain.getState(), this.id)
-  }
-
-  public get contract() {
-    return contractSelector(this.chain.getState(), this.id)
-  }
-
-  public get contracts() {
-    return contractsSelector(this.chain.getState(), this.id)
-  }
-
-  addContract(contract) {
-    this.chain.dispatch(addContract({
-      id: this.id,
-      contract: {
-        id: contract.id
-      }
-    }))
-
-    contract.connect(this)
-
-    return contract
   }
 }
 

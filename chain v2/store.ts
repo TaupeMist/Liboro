@@ -1,11 +1,13 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import logger from 'redux-logger'
 
-import { slice } from './address'
+import * as address from './address'
+import * as contract from './contract.store'
 
 const store = configureStore({
   reducer: {
-    address: slice.reducer
+    address: address.slice.reducer,
+    contract: contract.reducer
   },
   middleware: [...getDefaultMiddleware(), logger]
 })

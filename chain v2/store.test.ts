@@ -1,22 +1,32 @@
 import 'mocha'
 import { expect } from 'chai'
 
-import { chain } from '../chain v2'
+import chain from './chain'
 import Token from './token'
 
 describe('Chain', () => {
-  it('should init chain', () => {
+  it.only('should init chain', () => {
     const tokenAddress = chain.addAddress('tokenAddress')
 
-    const tmToken = new Token('tmToken')
+    const tmToken = new Token(tokenAddress, 'tmToken')
 
-    tokenAddress.addContract(tmToken)
+    tmToken.issue({
+      amount: 15,
+      receiver: tokenAddress
+    })
 
-    tmToken.mint(tokenAddress)
+    expect(chain.state.address.entities.tokenAddress.id).to.equal('tokenAddress')
+    expect(chain.state.address.entities.tokenAddress.contractIds).to.deep.equal([])
+    expect(chain.state.address.entities.tokenAddress.contractId).to.equal('tmToken')
 
-    console.log(tokenAddress.contracts)
-    // console.log(chain.state.address.entities.tokenAddress.contract.entities.tmToken)
-    // console.log(chain.addresses)
-    // console.log(token.state)
+    expect(chain.state.contract.entities.tmToken.id).to.equal('tmToken')
+    expect(chain.state.contract.entities.tmToken.global.supply).to.equal(15)
+    expect(chain.state.contract.entities.tmToken.tokenAddress.amount).to.equal(15)
+
+    // console.log('tokenAddress', chain.state.address.entities.tokenAddress)
+    // console.log('tmToken', chain.state.contract.entities.tmToken)
+
+    console.log('address', chain.state.address)
+    console.log('contract', chain.state.contract)
   })
 })
