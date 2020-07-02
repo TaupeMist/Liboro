@@ -1,10 +1,11 @@
 import Address from './address'
+import * as store from './store'
 
 import {
   setContract
 } from './contract.store'
 
-const stateSelector = (root, addressId, contractId) => root.contract[`${addressId}-${contractId}`]
+const stateSelector = (root: store.State, contractId: string) => root.contract.entities[contractId]
 
 export class Contract {
   constructor(public address: Address, public id: string) {
@@ -12,7 +13,7 @@ export class Contract {
   }
 
   public get state() {
-    return stateSelector(this.address.chain.getState(), this.address.id, this.id)
+    return stateSelector(this.address.chain.getState(), this.id)
   }
 
   public get dispatch() {

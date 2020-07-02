@@ -1,10 +1,9 @@
-import Address, { addAddress } from './address'
-
-import store from './store'
+import Address from './address'
+import store, { State } from './store'
 
 // import { createSelector } from 'reselect'
 
-const addressSelector = state => state.address
+const addressSelector = (state: State) => state.address
 
 const addressEntitiesSelector = state => addressSelector(state).entities
 
@@ -24,10 +23,8 @@ const addressesSelector = state => {
 export class Chain {
   constructor(private chain: typeof store) { }
 
-  addAddress(id) {
-    this.chain.dispatch(addAddress({ id }))
-
-    return new Address(this.chain, id)
+  addAddress(addressId) {
+    return new Address(this.chain, addressId)
   }
 
   public get state() {
