@@ -5,9 +5,9 @@ import store, { State } from './store'
 
 const addressSelector = (state: State) => state.address
 
-const addressEntitiesSelector = state => addressSelector(state).entities
+const addressEntitiesSelector = (state: State) => addressSelector(state).entities
 
-const addressesSelector = state => {
+const addressesSelector = (state: State) => {
   const address = addressSelector(state)
 
   return address.ids.map(id => address.entities[id])

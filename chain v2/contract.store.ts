@@ -1,6 +1,6 @@
 import { createAction, createReducer, PayloadAction, AnyAction, PrepareAction } from '@reduxjs/toolkit'
 
-import * as token from './token'
+import * as token from './token.store'
 import {
   SET_CONTRACT,
   CONTRACT,
